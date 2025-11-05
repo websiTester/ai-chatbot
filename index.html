@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện AI Chat Bot</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Thư viện Marked.js để render Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        /* Animation cho tin nhắn mới */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Thiết lập chiều cao cho toàn bộ layout */
+        .main-layout {
+            display: flex;
+            height: 100vh;
+            max-height: 100vh;
+            padding: 1rem;
+            gap: 1rem;
+            /* Thêm transition cho gap */
+            transition: gap 0.3s ease-in-out; 
+        }
+
+        /* Cột Cài đặt (Bên trái) */
+        .settings-panel {
+            flex: 0 0 400px; /* Cố định chiều rộng 400px */
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid #dee2e6;
+            overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            
+            /* Cập nhật cho transition */
+            position: relative; /* Cần để định vị nút thu gọn */
+            transition: all 0.3s ease-in-out;
+            overflow-x: hidden; /* Ẩn nội dung tràn ra khi thu gọn */
+        }
+        
+        /* Wrapper cho nội dung panel để transition mượt hơn */
+        .settings-panel-content {
+            opacity: 1;
+            /* Cập nhật transition */
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+            visibility: visible;
+        }
+
+        /* Cột Chat (Bên phải) */
+        .chat-container {
+            flex-grow: 1; /* Chiếm phần còn lại */
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* Chiếm 100% chiều cao của .main-layout */
+            max-height: 100%;
+            background-color: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #dee2e6;
+            overflow: hidden; /* Ẩn mọi thứ tràn ra ngoài */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            
+            /* Cập nhật cho transition */
+            position: relative; /* Cần để định vị nút mở rộng */
+        }
+
+        /* Khung Lịch sử chat */
+        .chat-history {
+            flex-grow: 1; /* Chiếm phần lớn không gian */
+            padding: 1.5rem;
+            overflow-y: auto; /* Thêm thanh cuộn khi tin nhắn đầy */
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth; /* Thêm cuộn mượt */
+        }
+
+        /* === CSS CẬP NHẬT CHO KHUNG INPUT === */
+        
+        /* Khung Nhập liệu chat */
+        .chat-input-form {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #dee2e6;
+            background-color: #ffffff; /* Đổi nền input thành trắng */
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.03); /* Thêm bóng mờ */
+            z-index: 10;
+        }
+        
+        /* Bọc input-group để tạo kiểu */
+        .chat-input-form .input-group {
+            display: flex;
+            align-items: center;
+            border-radius: 30px; /* Bo tròn pill shape */
+            background-color: #f1f3f5;
+            border: 1px solid #f1f3f5;
+            transition: all 0.3s ease;
+            height: 56px; /* Chiều cao cố định */
+            padding: 0; /* Xóa padding cũ */
+        }
+
+        /* Trạng thái focus cho input-group (dùng :focus-within) */
+        .chat-input-form .input-group:focus-within {
+            border-color: #a6c9ff;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25);
+        }
+
+        /* Nâng cấp ô input */
+        .chat-input-form .form-control {
+            border: none; /* Bỏ border của input */
+            box-shadow: none;
+            background-color: transparent; /* Nền trong suốt */
+            padding-left: 1.25rem; /* Tăng padding trái */
+            font-size: 1rem; /* Kích thước chữ tùy chỉnh */
+            height: 100%; /* Lấp đầy chiều cao của .input-group */
+            flex-grow: 1;
+            border-radius: 30px 0 0 30px; /* Bo tròn trái */
+        }
+
+        .chat-input-form .form-control:focus {
+            /* Tắt shadow mặc định của bootstrap khi focus */
+            box-shadow: none;
+            background-color: transparent;
+        }
+        .chat-input-form .form-control::placeholder {
+            color: #868e96;
+        }
+
+        /* Nâng cấp nút gửi */
+        .chat-input-form .btn {
+            border-radius: 0 30px 30px 0; /* Bo tròn phải */
+            width: 56px; /* Chiều rộng nút */
+            height: 100%; /* Chiều cao 100% */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem; /* Tăng cỡ icon */
+            border: none; /* Bỏ border */
+            margin-left: -1px; /* Dính liền vào input */
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .chat-input-form .btn:active {
+            transform: scale(0.95); /* Hiệu ứng nhấn */
+        }
+        
+        /* === KẾT THÚC CSS CẬP NHẬT === */
+
+        /* === CSS MỚI CHO SPINNER (SỬA LỖI) === */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Trạng thái MẶC ĐỊNH: Ẩn spinner, hiện icon gửi */
+        .chat-input-form #send-button .bi-send-fill {
+            display: inline-block;
+        }
+        .chat-input-form #send-button .bi-arrow-repeat {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Trạng thái LOADING: Ẩn icon gửi, hiện spinner */
+        .chat-input-form.is-loading #send-button .bi-send-fill {
+            display: none;
+        }
+        .chat-input-form.is-loading #send-button .bi-arrow-repeat {
+            display: inline-block;
+        }
+        /* === KẾT THÚC CSS SPINNER === */
+
+
+        /* Style cho bong bóng chat */
+        .message {
+            max-width: 80%; /* Giảm độ rộng tối đa */
+            padding: 0.8rem 1.2rem;
+            border-radius: 20px; /* Bo tròn đều */
+            line-height: 1.5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.06); /* Thêm bóng mờ */
+            animation: fadeIn 0.3s ease-out; /* Thêm animation */
+        }
+
+        .message.user {
+            background-color: #0d6efd;
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 8px; /* Giữ điểm nhấn */
+        }
+
+        .message.bot {
+            background-color: #f1f3f5; /* Màu xám nhạt hơn */
+            color: #212529; /* Màu chữ tối hơn */
+            align-self: flex-start;
+            border-bottom-left-radius: 8px; /* Giữ điểm nhấn */
+        }
+
+        /* Styling cho nội dung Markdown của Bot */
+        .message.bot h1, .message.bot h2, .message.bot h3 {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .message.bot p {
+            margin-bottom: 0.5rem;
+        }
+        .message.bot pre {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 0.75rem;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        .message.bot code {
+            color: #d63384;
+            font-size: 0.9em;
+        }
+        .message.bot pre code {
+            color: inherit;
+        }
+        .message.bot ul, .message.bot ol {
+            padding-left: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .message.bot blockquote {
+            border-left: 4px solid #ccc;
+            padding-left: 1rem;
+            margin-left: 0;
+            color: #6c757d;
+        }
+
+        /* Tiêu đề trong settings-panel */
+        .settings-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .agent-block {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: #fdfdfd;
+        }
+
+        .format-pair {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .format-pair .inputs {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        /* Ẩn/hiện textarea của instruction */
+        .instruction-textarea {
+            display: none; /* Mặc định ẩn, JS sẽ xử lý */
+            margin-top: 0.75rem;
+        }
+
+        /* Container cho các checkbox format */
+        .format-toggles-container {
+            border-top: 1px dashed #ddd;
+            margin-top: 1rem;
+            padding-top: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        /* Nút xóa preset trong Modal */
+        .delete-preset-btn {
+            margin-left: auto;
+            display: none; /* Ẩn đi, chỉ hiện khi hover */
+        }
+        .list-group-item:hover .delete-preset-btn {
+            display: inline-block;
+        }
+
+        /* === CSS MỚI CHO SIDEBAR THU GỌN === */
+
+        /* Nút Toggles (Nút duy nhất) */
+        #toggle-sidebar-btn {
+            position: absolute;
+            top: 1rem; /* Điều chỉnh vị trí */
+            right: 1rem; /* Điều chỉnh vị trí */
+            z-index: 10;
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease-in-out; /* Thêm transition cho nút */
+        }
+
+        /* Trạng thái khi sidebar bị thu gọn */
+        .sidebar-collapsed .settings-panel {
+            flex-basis: 70px; /* Thu hẹp lại 70px */
+            padding: 1.5rem 0.5rem; /* Giảm padding ngang */
+            transform: translateX(0); /* Reset transform */
+            opacity: 1; /* Luôn hiển thị */
+        }
+        
+        /* Ẩn nội dung bên trong khi thu gọn */
+        .sidebar-collapsed .settings-panel-content {
+            opacity: 0;
+            visibility: hidden; /* Ẩn hẳn */
+            height: 0; /* Giúp ẩn scrollbar */
+            overflow: hidden;
+        }
+
+        /* Di chuyển nút Toggle khi bị thu gọn */
+        .sidebar-collapsed #toggle-sidebar-btn {
+            right: auto; /* Bỏ right */
+            left: 50%; /* Căn giữa */
+            transform: translateX(-50%); /* Căn giữa tuyệt đối */
+        }
+        
+        /* === CSS MỚI CHO TOAST (POPUP) === */
+        .toast-container {
+            z-index: 1100; /* Đảm bảo nổi trên modal (nếu cần) */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Layout chính -->
+    <div class="main-layout">
+
+        <!-- ======================================= -->
+        <!-- CỘT CÀI ĐẶT (BÊN TRÁI) -->
+        <!-- ======================================= -->
+        <aside class="settings-panel">
+
+            <!-- NÚT TOGGLE MỚI (Thay thế 2 nút cũ) -->
+            <button class="btn btn-sm btn-outline-secondary" id="toggle-sidebar-btn" title="Thu/mở sidebar">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <!-- Wrapper nội dung để transition -->
+            <div class="settings-panel-content">
+
+                <!-- PHẦN INSTRUCTIONS -->
+                <div class="mb-4">
+                    <h2 class="settings-title">Instructions</h2>
+                    
+                    <!-- Agent 1 -->
+                    <div class="agent-block">
+                        <!-- CẬP NHẬT: Thêm layout flex cho H6 và Nút Reset -->
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="fw-semibold mb-0">Agent 1 (Chính)</h6>
+                            <button class="btn btn-sm btn-outline-warning" id="reset-agent-1-btn" title="Reset Agent 1">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                        </div>
+                        
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input instruction-toggle" type="radio" name="agent1-toggle" id="agent1-default" value="default" data-agent="1">
+                            <label class="form-check-label" for="agent1-default">Dùng mặc định</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input instruction-toggle" type="radio" name="agent1-toggle" id="agent1-custom" value="custom" data-agent="1" checked>
+                            <label class="form-check-label" for="agent1-custom">Dùng tùy chỉnh</label>
+                        </div>
+                        <textarea id="instruction-agent-1" class="form-control instruction-textarea" rows="3" placeholder="Nhập instruction cho Agent 1..."></textarea>
+                        
+                        <!-- Checkbox format cho Agent 1 -->
+                        <div id="agent-1-format-toggles" class="format-toggles-container small mt-2">
+                            <!-- Checkbox sẽ được thêm bằng JS -->
+                        </div>
+                    </div>
+
+                    <!-- Agent 2 -->
+                    <div class="agent-block">
+                        <h6 class="fw-semibold">Agent 2</h6>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input instruction-toggle" type="radio" name="agent2-toggle" id="agent2-default" value="default" data-agent="2">
+                            <label class="form-check-label" for="agent2-default">Dùng mặc định</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input instruction-toggle" type="radio" name="agent2-toggle" id="agent2-custom" value="custom" data-agent="2" checked>
+                            <label class="form-check-label" for="agent2-custom">Dùng tùy chỉnh</label>
+                        </div>
+                        <textarea id="instruction-agent-2" class="form-control instruction-textarea" rows="3" placeholder="Nhập instruction cho Agent 2..."></textarea>
+                        
+                        <!-- Checkbox format cho Agent 2 -->
+                        <div id="agent-2-format-toggles" class="format-toggles-container small mt-2">
+                            <!-- Checkbox sẽ được thêm bằng JS -->
+                        </div>
+                    </div>
+
+                    <!-- Agent 3 -->
+                    <div class="agent-block">
+                        <h6 class="fw-semibold">Agent 3</h6>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input instruction-toggle" type="radio" name="agent3-toggle" id="agent3-default" value="default" data-agent="3">
+                            <label class="form-check-label" for="agent3-default">Dùng mặc định</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input instruction-toggle" type="radio" name="agent3-toggle" id="agent3-custom" value="custom" data-agent="3" checked>
+                            <label class="form-check-label" for="agent3-custom">Dùng tùy chỉnh</label>
+                        </div>
+                        <textarea id="instruction-agent-3" class="form-control instruction-textarea" rows="3" placeholder="Nhập instruction cho Agent 3..."></textarea>
+                        
+                        <!-- Checkbox format cho Agent 3 -->
+                        <div id="agent-3-format-toggles" class="format-toggles-container small mt-2">
+                            <!-- Checkbox sẽ được thêm bằng JS -->
+                        </div>
+                    </div>
+
+                    <!-- Agent 4 -->
+                    <div class="agent-block">
+                        <h6 class="fw-semibold">Agent 4</h6>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input instruction-toggle" type="radio" name="agent4-toggle" id="agent4-default" value="default" data-agent="4">
+                            <label class="form-check-label" for="agent4-default">Dùng mặc định</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input instruction-toggle" type="radio" name="agent4-toggle" id="agent4-custom" value="custom" data-agent="4" checked>
+                            <label class="form-check-label" for="agent4-custom">Dùng tùy chỉnh</label>
+                        </div>
+                        <textarea id="instruction-agent-4" class="form-control instruction-textarea" rows="3" placeholder="Nhập instruction cho Agent 4..."></textarea>
+                        
+                        <!-- Checkbox format cho Agent 4 -->
+                        <div id="agent-4-format-toggles" class="format-toggles-container small mt-2">
+                            <!-- Checkbox sẽ được thêm bằng JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Nút Lưu Instructions -->
+                    <button class="btn btn-success w-100 mt-2" id="save-instructions-btn">
+                        <i class="bi bi-cloud-arrow-up-fill"></i> Lưu Instructions
+                    </button>
+                    <!-- <div id="save-instructions-status" class="form-text mt-2"></div> Đã xóa, thay bằng Toast -->
+
+                </div>
+
+                <!-- PHẦN FORMAT -->
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h2 class="settings-title" style="margin-bottom: 0; border: none;">Format</h2>
+                        <button class="btn btn-sm btn-outline-primary" id="view-all-formats-btn" data-bs-toggle="modal" data-bs-target="#formatsModal">
+                            <i class="bi bi-grid-3x3-gap-fill"></i> Xem tất cả
+                        </button>
+                    </div>
+
+                    <!-- Tên Format hiện tại -->
+                    <div class="mb-3">
+                        <label for="current-format-name" class="form-label">Tên Format:</label>
+                        <input type="text" class="form-control" id="current-format-name" placeholder="Đặt tên cho format này...">
+                    </div>
+
+                    <p class="form-text">Định dạng khung trả lời bằng Markdown. Sử dụng <code>[CONTENT]</code> để chèn nội dung AI tạo ra.</p>
+                    
+                    <!-- Container cho các cặp header/content động -->
+                    <div id="format-pairs-container">
+                        <!-- Các cặp Header/Content sẽ được thêm vào đây bằng JS -->
+                    </div>
+
+                    <!-- Nút thêm cặp -->
+                    <button class="btn btn-sm btn-outline-success mt-2" id="add-format-pair-btn">
+                        <i class="bi bi-plus-circle-fill"></i> Thêm cặp Header/Content
+                    </button>
+
+                    <!-- Nút Lưu Format -->
+                    <button class="btn btn-success w-100 mt-3" id="save-format-btn">
+                        <i class="bi bi-cloud-arrow-up-fill"></i> Lưu Format
+                    </button>
+                    <!-- <div id="save-format-status" class="form-text mt-2"></div> Đã xóa, thay bằng Toast -->
+                    <div id="format-limit-error" class="text-danger small mt-2"></div>
+
+                </div>
+            </div> <!-- Kết thúc .settings-panel-content -->
+
+        </aside>
+
+        <!-- ======================================= -->
+        <!-- CỘT CHAT (BÊN PHẢI) -->
+        <!-- ======================================= -->
+        <main class="chat-container">
+
+            <!-- Lịch sử chat -->
+            <div class="chat-history" id="chat-history">
+                <!-- Tin nhắn mẫu của Bot -->
+                <div class="message bot">
+                    Xin chào! Tôi là AI Chat Bot. Bạn có thể nhập instruction và format ở cột bên trái để tùy chỉnh cách tôi trả lời.
+                    <br>
+                    Nhấn vào nút <i class="bi bi-list"></i> ở bên trái để thu gọn sidebar.
+                </div>
+            </div>
+
+            <!-- Form nhập liệu -->
+            <form class="chat-input-form" id="chat-form">
+                <div class="input-group">
+                    <input type="text" id="chat-input" class="form-control" placeholder="Nhập tin nhắn của bạn..." autocomplete="off">
+                    <button class="btn btn-primary" type="submit" id="send-button">
+                        <i class="bi bi-send-fill"></i>
+                        <!-- SỬA LỖI: Xóa class 'd-none' -->
+                        <i class="bi bi-arrow-repeat"></i> 
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+
+
+    <!-- ======================================= -->
+    <!-- MODAL HIỂN THỊ TẤT CẢ FORMAT -->
+    <!-- ======================================= -->
+    <div class="modal fade" id="formatsModal" tabindex="-1" aria-labelledby="formatsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="formatsModalLabel">Chọn một Format</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Nhấn vào một format để tải nó vào trình chỉnh sửa.</p>
+                    <ul class="list-group" id="modal-format-list">
+                        <!-- Danh sách format sẽ được thêm bằng JS -->
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ======================================= -->
+    <!-- TOAST (POPUP) THÔNG BÁO -->
+    <!-- ======================================= -->
+    <div class="toast-container position-fixed top-0 end-0 p-3">
+        <!-- CẬP NHẬT: Thêm class .show để hiển thị mặc định -->
+        <div id="genericToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+            <div class="toast-header">
+                <i class="bi bi-check-circle-fill me-2"></i> <!-- Icon sẽ thay đổi -->
+                <strong class="me-auto">Thông báo</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body" id="genericToastBody">
+                <!-- Nội dung thông báo sẽ được chèn vào đây -->
+                Đây là thông báo mặc định.
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Bootstrap JS (Cần thiết cho Modal) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // === CÁC HẰNG SỐ VÀ ELEMENT CHÍNH ===
+            const chatHistory = document.getElementById('chat-history');
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-button');
+            
+            // Elements cho Instruction
+            const saveInstructionsBtn = document.getElementById('save-instructions-btn');
+            const resetAgent1Btn = document.getElementById('reset-agent-1-btn'); // NÚT MỚI
+            // const saveInstructionsStatus = document.getElementById('save-instructions-status'); // Đã xóa
+            const instructionToggles = document.querySelectorAll('.instruction-toggle');
+
+            // Elements cho Format
+            const formatPairsContainer = document.getElementById('format-pairs-container');
+            const addFormatPairBtn = document.getElementById('add-format-pair-btn');
+            const saveFormatBtn = document.getElementById('save-format-btn');
+            // const saveFormatStatus = document.getElementById('save-format-status'); // Đã xóa
+            const formatLimitError = document.getElementById('format-limit-error');
+            const currentFormatNameInput = document.getElementById('current-format-name');
+            const MAX_FORMAT_PAIRS = 10;
+
+            // Elements cho Preset (Modal)
+            const PRESET_STORAGE_KEY = 'aiChatbotPresets'; // Key cho localStorage
+            const viewAllFormatsBtn = document.getElementById('view-all-formats-btn');
+            const modalFormatList = document.getElementById('modal-format-list');
+            const formatModal = new bootstrap.Modal(document.getElementById('formatsModal'));
+
+            // === ELEMENT MỚI CHO TOAST (POPUP) ===
+            const genericToastEl = document.getElementById('genericToast');
+            const genericToastBody = document.getElementById('genericToastBody');
+            const genericToastHeaderIcon = genericToastEl.querySelector('.toast-header i');
+            const bsToast = new bootstrap.Toast(genericToastEl); // Tự động ẩn sau 3s (thiết lập qua data-bs-delay)
+
+            // === ELEMENT MỚI CHO SIDEBAR ===
+            // const hideSidebarBtn = document.getElementById('hide-sidebar-btn'); // Cũ
+            // const showSidebarBtn = document.getElementById('show-sidebar-btn'); // Cũ
+            const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn'); // Nút mới
+            const mainLayout = document.querySelector('.main-layout');
+
+            
+            // Dữ liệu mặc định
+            const DEFAULT_INSTRUCTIONS = {
+                1: "Bạn là một trợ lý AI hữu ích. Hãy trả lời các câu hỏi của người dùng.",
+                2: "Bạn là một chuyên gia phân tích. Hãy đưa ra các phân tích chuyên sâu.",
+                3: "Bạn là một nhà sáng tạo. Hãy đưa ra các ý tưởng mới lạ.",
+                4: "Bạn là một người kiểm duyệt. Hãy đảm bảo câu trả lời an toàn và lịch sự."
+            };
+            
+            const DEFAULT_FORMAT = [
+                { header: "## Tóm tắt", content: "[CONTENT]" },
+                { header: "---", content: "Đây là câu trả lời do AI tạo ra." }
+            ];
+
+
+            // === LOGIC MỚI CHO THU GỌN SIDEBAR ===
+            toggleSidebarBtn.addEventListener('click', () => {
+                mainLayout.classList.toggle('sidebar-collapsed');
+                
+                // Cập nhật icon và title cho nút
+                const isCollapsed = mainLayout.classList.contains('sidebar-collapsed');
+                // const icon = toggleSidebarBtn.querySelector('i'); // Đã xóa logic thay đổi icon
+                
+                if (isCollapsed) {
+                    // Chuyển sang icon "Mở"
+                    // icon.classList.remove('bi-chevron-bar-left'); // Đã xóa
+                    // icon.classList.add('bi-chevron-bar-right'); // Đã xóa
+                    toggleSidebarBtn.title = 'Mở sidebar';
+                } else {
+                    // Chuyển sang icon "Đóng"
+                    // icon.classList.remove('bi-chevron-bar-right'); // Đã xóa
+                    // icon.classList.add('bi-chevron-bar-left'); // Đã xóa
+                    toggleSidebarBtn.title = 'Thu gọn sidebar';
+                }
+            });
+
+            // === HÀM MỚI ĐỂ RESET AGENT ===
+            /**
+             * Reset cài đặt của một agent về mặc định
+             * @param {string} agentId - ID của agent (ví dụ: '1')
+             */
+            function handleResetAgent(agentId) {
+                // 1. Set radio về "Dùng mặc định"
+                const defaultRadio = document.getElementById(`agent${agentId}-default`);
+                const customRadio = document.getElementById(`agent${agentId}-custom`);
+                if (defaultRadio) defaultRadio.checked = true;
+                if (customRadio) customRadio.checked = false;
+
+                // 2. Xóa nội dung textarea
+                const textarea = document.getElementById(`instruction-agent-${agentId}`);
+                if (textarea) textarea.value = '';
+
+                // 3. Ẩn textarea (gọi hàm đã có)
+                toggleInstructionTextarea(agentId, 'default');
+
+                // 4. Bỏ check tất cả các format toggles
+                const toggles = document.querySelectorAll(`#agent-${agentId}-format-toggles input[type="checkbox"]`);
+                toggles.forEach(cb => cb.checked = false);
+
+                // 5. Hiển thị thông báo
+                showToast(`Đã reset Agent ${agentId} về mặc định.`, 'success');
+            }
+
+            // Gán sự kiện cho nút reset Agent 1
+            resetAgent1Btn.addEventListener('click', (e) => {
+                e.preventDefault(); // Ngăn form submit (nếu có)
+                handleResetAgent('1');
+            });
+
+
+            // === HÀM MỚI ĐỂ HIỂN THỊ TOAST (POPUP) ===
+            /**
+             * Hiển thị thông báo toast
+             * @param {string} message - Nội dung thông báo
+             * @param {string} type - 'success' (mặc định) hoặc 'danger'
+             */
+            function showToast(message, type = 'success') {
+                genericToastBody.textContent = message;
+
+                // Cập nhật màu sắc và icon
+                const toastHeader = genericToastEl.querySelector('.toast-header');
+                if (type === 'danger') {
+                    // Dùng class của Bootstrap 5.3+ cho màu nền và chữ
+                    genericToastEl.classList.remove('text-bg-success');
+                    genericToastEl.classList.add('text-bg-danger');
+                    genericToastHeaderIcon.classList.remove('bi-check-circle-fill');
+                    genericToastHeaderIcon.classList.add('bi-exclamation-triangle-fill');
+                } else {
+                    genericToastEl.classList.remove('text-bg-danger');
+                    genericToastEl.classList.add('text-bg-success');
+                    genericToastHeaderIcon.classList.remove('bi-check-circle-fill');
+                    genericToastHeaderIcon.classList.add('bi-check-circle-fill');
+                }
+
+                bsToast.show();
+            }
+
+
+            // === LOGIC XỬ LÝ INSTRUCTION ===
+
+            /**
+             * Ẩn/hiện textarea dựa trên lựa chọn radio
+             */
+            function toggleInstructionTextarea(agentId, mode) {
+                const textarea = document.getElementById(`instruction-agent-${agentId}`);
+                if (mode === 'default') {
+                    textarea.style.display = 'none';
+                } else { // custom
+                    textarea.style.display = 'block';
+                }
+            }
+
+            // Gán sự kiện cho tất cả radio button
+            instructionToggles.forEach(toggle => {
+                toggle.addEventListener('change', (e) => {
+                    const agentId = e.target.dataset.agent;
+                    const mode = e.target.value;
+                    toggleInstructionTextarea(agentId, mode);
+                });
+                
+                // Khởi tạo trạng thái ban đầu (custom)
+                if (toggle.value === 'custom' && toggle.checked) {
+                    toggleInstructionTextarea(toggle.dataset.agent, 'custom');
+                } else if (toggle.value === 'default' && toggle.checked) {
+                    toggleInstructionTextarea(toggle.dataset.agent, 'default');
+                }
+            });
+
+            /**
+             * Xử lý lưu Instructions (mô phỏng)
+             */
+            function handleSaveInstructions(e) {
+                e.preventDefault();
+                saveInstructionsBtn.disabled = true;
+                saveInstructionsBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Đang lưu...';
+
+                const instructions = {};
+                for (let i = 1; i <= 4; i++) {
+                    const mode = document.querySelector(`input[name="agent${i}-toggle"]:checked`).value;
+                    let instructionValue;
+                    if (mode === 'default') {
+                        instructionValue = 'DEFAULT';
+                    } else {
+                        instructionValue = document.getElementById(`instruction-agent-${i}`).value;
+                    }
+
+                    // Lấy các header được check
+                    const toggles = document.querySelectorAll(`#agent-${i}-format-toggles input[type="checkbox"]:checked`);
+                    const checkedHeaders = Array.from(toggles).map(cb => cb.value);
+
+                    instructions[`agent${i}`] = {
+                        instruction: instructionValue,
+                        headers: checkedHeaders
+                    };
+                }
+                
+                console.log("Đang lưu instructions (mô phỏng):", instructions);
+
+                // Mô phỏng gọi API
+                setTimeout(() => {
+                    saveInstructionsBtn.disabled = false;
+                    saveInstructionsBtn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Lưu Instructions';
+                    
+                    // CẬP NHẬT: Hiển thị Toast thay vì text
+                    showToast('Đã lưu instructions thành công!', 'success');
+                    // saveInstructionsStatus.textContent = 'Đã lưu thành công!';
+                    // saveInstructionsStatus.className = 'form-text text-success mt-2';
+                    // setTimeout(() => saveInstructionsStatus.textContent = '', 3000);
+                }, 1000);
+            }
+
+
+            // === LOGIC XỬ LÝ FORMAT ===
+
+            /**
+             * Thêm một cặp Header/Content mới vào UI
+             * @param {string} headerVal - Giá trị cho ô header (mặc định là rỗng)
+             * @param {string} contentVal - Giá trị cho ô content (mặc định là rỗng)
+             */
+            function addFormatPair(headerVal = '', contentVal = '') {
+                const currentPairs = formatPairsContainer.children.length;
+                if (currentPairs >= MAX_FORMAT_PAIRS) {
+                    formatLimitError.textContent = `Lỗi: Chỉ có thể thêm tối đa ${MAX_FORMAT_PAIRS} cặp.`;
+                    setTimeout(() => formatLimitError.textContent = '', 3000);
+                    return;
+                }
+
+                const pairDiv = document.createElement('div');
+                pairDiv.className = 'format-pair';
+                
+                pairDiv.innerHTML = `
+                    <div class="inputs">
+                        <input type="text" class="form-control form-control-sm format-header" placeholder="Header (ví dụ: ## Tiêu đề)" value="${escapeHTML(headerVal)}">
+                        <textarea class="form-control form-control-sm format-content" rows="2" placeholder="Content (ví dụ: [CONTENT] hoặc nội dung cố định)">${escapeHTML(contentVal)}</textarea>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger remove-format-pair-btn">
+                        <i class="bi bi-trash-fill"></i>
+                    </button>
+                `;
+
+                formatPairsContainer.appendChild(pairDiv);
+                
+                // Gán sự kiện xóa cho nút vừa tạo
+                pairDiv.querySelector('.remove-format-pair-btn').addEventListener('click', () => {
+                    removeFormatPair(pairDiv);
+                });
+
+                // Cập nhật checkbox cho agents
+                updateAllAgentFormatToggles();
+            }
+
+            /**
+             * Xóa một cặp Header/Content
+             * @param {HTMLElement} pairDiv - Element div.format-pair cần xóa
+             */
+            function removeFormatPair(pairDiv) {
+                formatPairsContainer.removeChild(pairDiv);
+                // Xóa thông báo lỗi nếu có
+                if (formatLimitError.textContent) {
+                    formatLimitError.textContent = '';
+                }
+                // Cập nhật checkbox cho agents
+                updateAllAgentFormatToggles();
+            }
+
+            /**
+             * Xử lý lưu Format (Lưu vào localStorage làm preset)
+             */
+            function handleSaveFormat(e) {
+                e.preventDefault();
+
+                const formatName = currentFormatNameInput.value.trim();
+                if (!formatName) {
+                    // CẬP NHẬT: Hiển thị Toast thay vì text
+                    showToast('Lỗi: Vui lòng nhập Tên Format để lưu.', 'danger');
+                    // saveFormatStatus.textContent = 'Lỗi: Vui lòng nhập Tên Format để lưu.';
+                    // saveFormatStatus.className = 'form-text text-danger mt-2';
+                    // setTimeout(() => saveFormatStatus.textContent = '', 3000);
+                    return;
+                }
+
+                saveFormatBtn.disabled = true;
+                saveFormatBtn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Đang lưu...';
+                
+                const formatData = collectCurrentFormatPairs();
+                
+                // Lưu vào localStorage
+                try {
+                    const presets = getPresets();
+                    presets[formatName] = formatData; // Thêm hoặc ghi đè
+                    localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(presets));
+
+                    // Hiển thị thông báo thành công
+                    setTimeout(() => {
+                        saveFormatBtn.disabled = false;
+                        saveFormatBtn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Lưu Format';
+                        
+                        // CẬP NHẬT: Hiển thị Toast thay vì text
+                        showToast(`Đã lưu preset "${formatName}"!`, 'success');
+                        // saveFormatStatus.textContent = `Đã lưu preset "${formatName}"!`;
+                        // saveFormatStatus.className = 'form-text text-success mt-2';
+                        // setTimeout(() => saveFormatStatus.textContent = '', 3000);
+                    }, 500);
+
+                } catch (error) {
+                    console.error("Lỗi lưu localStorage:", error);
+                    // CẬP NHẬT: Hiển thị Toast thay vì text
+                    showToast('Lỗi: Không thể lưu vào bộ nhớ trình duyệt.', 'danger');
+                    // saveFormatStatus.textContent = 'Lỗi: Không thể lưu vào bộ nhớ trình duyệt.';
+                    // saveFormatStatus.className = 'form-text text-danger mt-2';
+                    saveFormatBtn.disabled = false;
+                    saveFormatBtn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> Lưu Format';
+                }
+            }
+
+            /**
+             * Thu thập tất cả các cặp Header/Content từ UI
+             * @returns {Array<object>} Mảng các đối tượng {header, content}
+             */
+            function collectCurrentFormatPairs() {
+                const pairs = [];
+                const pairElements = formatPairsContainer.querySelectorAll('.format-pair');
+                pairElements.forEach(pair => {
+                    const header = pair.querySelector('.format-header').value;
+                    const content = pair.querySelector('.format-content').value;
+                    pairs.push({ header, content });
+                });
+                return pairs;
+            }
+
+            // === LOGIC XỬ LÝ AGENT FORMAT TOGGLES (Checkbox) ===
+
+            /**
+             * Cập nhật danh sách checkbox header cho tất cả agents
+             */
+            function updateAllAgentFormatToggles() {
+                // 1. Lấy tất cả các header hiện tại
+                const headers = Array.from(formatPairsContainer.querySelectorAll('.format-header'))
+                                     .map(input => input.value.trim())
+                                     .filter(header => header.length > 0); // Chỉ lấy header có nội dung
+
+                // 2. Lặp qua 4 agent để cập nhật
+                for (let i = 1; i <= 4; i++) {
+                    const container = document.getElementById(`agent-${i}-format-toggles`);
+                    if (!container) continue;
+
+                    // 3. Lưu trạng thái check hiện tại
+                    const checkedState = {};
+                    container.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        checkedState[cb.value] = cb.checked;
+                    });
+
+                    // 4. Xóa và tạo lại
+                    container.innerHTML = ''; // Xóa checkbox cũ
+
+                    if (headers.length === 0) {
+                        container.innerHTML = '<span class="text-muted">Chưa có header nào trong Format.</span>';
+                        continue;
+                    }
+
+                    headers.forEach((header, index) => {
+                        const checkboxId = `agent-${i}-header-${index}`;
+                        const isChecked = checkedState[header] ? 'checked' : ''; // Khôi phục trạng thái
+                        
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'form-check form-check-inline';
+                        wrapper.innerHTML = `
+                            <input class="form-check-input" type="checkbox" id="${checkboxId}" value="${escapeHTML(header)}" ${isChecked}>
+                            <label class="form-check-label" for="${checkboxId}">${escapeHTML(header)}</label>
+                        `;
+                        container.appendChild(wrapper);
+                    });
+                }
+            }
+
+            // Thêm sự kiện 'input' cho container để cập nhật checkbox khi gõ
+            formatPairsContainer.addEventListener('input', (e) => {
+                if (e.target.classList.contains('format-header')) {
+                    // Dùng debounce để tránh cập nhật quá nhiều lần
+                    debounce(updateAllAgentFormatToggles, 300)();
+                }
+            });
+
+            // Hàm debounce
+            let debounceTimer;
+            function debounce(func, delay) {
+                return function() {
+                    const context = this;
+                    const args = arguments;
+                    clearTimeout(debounceTimer);
+                    debounceTimer = setTimeout(() => func.apply(context, args), delay);
+                };
+            }
+
+
+            // === LOGIC XỬ LÝ PRESET (MODAL VÀ LOCALSTORAGE) ===
+
+            /**
+             * Lấy tất cả preset từ localStorage
+             * @returns {object} Đối tượng preset
+             */
+            function getPresets() {
+                try {
+                    const presets = localStorage.getItem(PRESET_STORAGE_KEY);
+                    return presets ? JSON.parse(presets) : {};
+                } catch (error) {
+                    console.error("Lỗi đọc localStorage:", error);
+                    return {};
+                }
+            }
+
+            /**
+             * Tải format từ một mảng các cặp {header, content}
+             * @param {Array<object>} formatPairs Mảng các cặp {header, content}
+             */
+            function loadFormat(formatPairs) {
+                // Xóa tất cả các cặp hiện tại
+                formatPairsContainer.innerHTML = '';
+                formatLimitError.textContent = ''; // Xóa lỗi (nếu có)
+                
+                // Thêm các cặp từ preset
+                if (formatPairs && formatPairs.length > 0) {
+                    formatPairs.forEach(pair => {
+                        addFormatPair(pair.header, pair.content);
+                    });
+                }
+                
+                // Cập nhật checkbox (QUAN TRỌNG)
+                updateAllAgentFormatToggles();
+            }
+
+            /**
+             * Xử lý khi mở Modal "Xem tất cả"
+             */
+            function handleViewAllFormats() {
+                modalFormatList.innerHTML = ''; // Xóa danh sách cũ
+                const presets = getPresets();
+
+                // 1. Thêm Format Mặc Định
+                const defaultItem = document.createElement('li');
+                defaultItem.className = 'list-group-item list-group-item-action list-group-item-info d-flex justify-content-between align-items-center';
+                defaultItem.innerHTML = '<span><i class="bi bi-star-fill"></i> Format Mặc Định (Hệ thống)</span>';
+                
+                defaultItem.onclick = (e) => {
+                    // Chỉ tải nếu click vào text, không phải nút xóa
+                    if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                        loadFormat(DEFAULT_FORMAT);
+                        currentFormatNameInput.value = 'Format Mặc Định (Hệ thống)'; // Cập nhật tên
+                        formatModal.hide();
+                    }
+                };
+                modalFormatList.appendChild(defaultItem);
+
+                // 2. Thêm các preset đã lưu
+                if (Object.keys(presets).length === 0) {
+                     const infoItem = document.createElement('li');
+                    infoItem.className = 'list-group-item text-muted';
+                    infoItem.textContent = 'Chưa có preset nào được lưu. Hãy đặt tên và nhấn "Lưu Format" để tạo preset mới.';
+                    modalFormatList.appendChild(infoItem);
+                } else {
+                    for (const name in presets) {
+                        const presetItem = document.createElement('li');
+                        presetItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                        
+                        // Tên preset
+                        const nameSpan = document.createElement('span');
+                        nameSpan.textContent = name;
+                        
+                        // Nút xóa
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'btn btn-sm btn-outline-danger delete-preset-btn';
+                        deleteBtn.innerHTML = '<i class="bi bi-trash-fill"></i>';
+                        deleteBtn.title = `Xóa preset "${name}"`;
+                        
+                        // Sự kiện Xóa
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation(); // Ngăn không cho sự kiện click tải preset
+                            if (confirm(`Bạn có chắc muốn xóa preset "${name}" không?`)) {
+                                delete presets[name];
+                                localStorage.setItem(PRESET_STORAGE_KEY, JSON.stringify(presets));
+                                handleViewAllFormats(); // Tải lại danh sách modal
+                            }
+                        };
+                        
+                        presetItem.appendChild(nameSpan);
+                        presetItem.appendChild(deleteBtn);
+
+                        // Sự kiện Tải
+                        presetItem.onclick = (e) => {
+                            if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+                                loadFormat(presets[name]); // Tải data của preset đó
+                                currentFormatNameInput.value = name; // Cập nhật tên
+                                formatModal.hide();
+                            }
+                        };
+                        
+                        modalFormatList.appendChild(presetItem);
+                    }
+                }
+            }
+
+
+            // === LOGIC XỬ LÝ CHAT CHÍNH ===
+
+            /**
+             * Xử lý gửi tin nhắn
+             */
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const userMessage = chatInput.value.trim();
+
+                if (userMessage) {
+                    // Hiển thị tin nhắn người dùng
+                    displayMessage(userMessage, 'user');
+                    chatInput.value = '';
+                    
+                    // Tắt nút gửi khi chờ bot trả lời
+                    sendButton.disabled = true;
+                    chatInput.disabled = true;
+                    chatForm.classList.add('is-loading'); // THÊM MỚI
+
+                    // Mô phỏng bot trả lời sau 1 giây
+                    setTimeout(() => {
+                        generateBotResponse(userMessage);
+                        sendButton.disabled = false;
+                        chatInput.disabled = false;
+                        chatForm.classList.remove('is-loading'); // THÊM MỚI
+                        chatInput.focus();
+                    }, 1000);
+                }
+            });
+
+            /**
+             * Hiển thị tin nhắn lên màn hình
+             * @param {string} message - Nội dung tin nhắn
+             * @param {string} sender - 'user' hoặc 'bot'
+             */
+            function displayMessage(message, sender) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('message', sender);
+
+                if (sender === 'bot') {
+                    // Nếu là bot, dùng innerHTML để render Markdown đã được parse
+                    messageElement.innerHTML = message;
+                } else {
+                    // Nếu là user, dùng textContent để tránh XSS
+                    messageElement.textContent = message;
+                }
+
+                chatHistory.appendChild(messageElement);
+                // Tự động cuộn xuống tin nhắn mới nhất
+                chatHistory.scrollTop = chatHistory.scrollHeight;
+            }
+
+            /**
+             * Mô phỏng AI tạo câu trả lời
+             * @param {string} userMessage - Tin nhắn của người dùng
+             */
+            function generateBotResponse(userMessage) {
+                // 1. Lấy Instruction (chỉ lấy agent 1 làm ví dụ)
+                const agent1Mode = document.querySelector('input[name="agent1-toggle"]:checked').value;
+                let instruction;
+                if (agent1Mode === 'default') {
+                    instruction = DEFAULT_INSTRUCTIONS[1];
+                } else {
+                    instruction = document.getElementById('instruction-agent-1').value.trim();
+                }
+
+                // Lấy các header được Agent 1 check
+                const agent1Toggles = document.querySelectorAll('#agent-1-format-toggles input[type="checkbox"]:checked');
+                const agent1CheckedHeaders = Array.from(agent1Toggles).map(cb => cb.value);
+
+                // 2. Lấy Format
+                const formatPairs = collectCurrentFormatPairs();
+
+                // 3. Mô phỏng câu trả lời thô (raw answer)
+                let rawAnswer = `Đây là câu trả lời mô phỏng cho câu hỏi: "${userMessage}".`;
+                
+                // 4. Kiểm tra instruction (ví dụ đơn giản)
+                if (instruction.includes("ngắn gọn")) {
+                    rawAnswer = `Trả lời ngắn: "${userMessage}".`;
+                } else if (instruction.includes("chuyên gia")) {
+                    rawAnswer = `Theo phân tích của chuyên gia, câu trả lời cho "${userMessage}" là... bla bla.`;
+                }
+
+                // Thêm thông tin về header (nếu có)
+                if (agent1CheckedHeaders.length > 0) {
+                    rawAnswer += `\n\n(Agent 1 đã phân tích các header: ${agent1CheckedHeaders.join(', ')})`;
+                }
+
+                // 5. Xây dựng câu trả lời cuối cùng dựa trên Format
+                let finalMarkdownResponse = "";
+                
+                if (formatPairs.length > 0) {
+                    formatPairs.forEach(pair => {
+                        // Nối header
+                        if (pair.header) {
+                            finalMarkdownResponse += pair.header + "\n\n";
+                        }
+                        // Nối content, thay thế [CONTENT]
+                        if (pair.content) {
+                            finalMarkdownResponse += pair.content.replace(/\[CONTENT\]/g, rawAnswer) + "\n\n";
+                        }
+                    });
+                } else {
+                    // Nếu không có format nào, dùng format mặc định
+                    DEFAULT_FORMAT.forEach(pair => {
+                        finalMarkdownResponse += pair.header + "\n\n";
+                        finalMarkdownResponse += pair.content.replace(/\[CONTENT\]/g, rawAnswer) + "\n\n";
+                    });
+                }
+
+                // 6. Parse Markdown sang HTML
+                // Sử dụng 'gfm: true' để kích hoạt GitHub Flavored Markdown (cho bảng, gạch ngang chữ, v.v.)
+                // Sử dụng 'breaks: true' để tự động biến \n thành <br>
+                const htmlResponse = marked.parse(finalMarkdownResponse, { gfm: true, breaks: true });
+
+                // 7. Hiển thị câu trả lời của bot
+                displayMessage(htmlResponse, 'bot');
+            }
+
+            /**
+             * Hàm tiện ích để thoát HTML (tránh XSS khi chèn vào value của input)
+             */
+            function escapeHTML(str) {
+                return str.replace(/&/g, '&amp;')
+                          .replace(/</g, '&lt;')
+                          .replace(/>/g, '&gt;')
+                          .replace(/"/g, '&quot;')
+                          .replace(/'/g, '&#039;');
+            }
+
+
+            // === KHỞI TẠO KHI TẢI TRANG ===
+            
+            // Khởi tạo trạng thái cho các instruction radio
+            instructionToggles.forEach(toggle => {
+                const agentId = toggle.dataset.agent;
+                const mode = toggle.value;
+                if (toggle.checked) {
+                    toggleInstructionTextarea(agentId, mode);
+                }
+            });
+            
+            // Tải format mặc định lên UI khi khởi động
+            loadFormat(DEFAULT_FORMAT);
+            currentFormatNameInput.value = "Format Mặc Định";
+
+            // Khởi tạo checkbox cho agents (sau khi format mặc định đã tải)
+            updateAllAgentFormatToggles();
+
+            // Gán sự kiện cho các nút
+            saveInstructionsBtn.addEventListener('click', handleSaveInstructions);
+            addFormatPairBtn.addEventListener('click', () => addFormatPair()); // Nút thêm cặp
+            saveFormatBtn.addEventListener('click', handleSaveFormat);
+            
+            // Gán sự kiện cho modal (để tải lại danh sách mỗi khi mở)
+            viewAllFormatsBtn.addEventListener('click', handleViewAllFormats);
+
+        });
+    </script>
+
+</body>
+</html>
+
