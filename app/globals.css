@@ -20,35 +20,30 @@
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
+            background-color: #f8f9fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
 
+        /* Animation cho tin nhắn mới */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-body {
-    background-color: #f8f9fa;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-}
-
-        
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
+        /* Thiết lập chiều cao cho toàn bộ layout */
         .main-layout {
             display: flex;
             height: 100vh;
             max-height: 100vh;
             padding: 1rem;
             gap: 1rem;
+            /* Thêm transition cho gap */
             transition: gap 0.3s ease-in-out; 
         }
 
@@ -59,21 +54,78 @@ body {
             border-radius: 12px;
             padding: 1.5rem;
             border: 1px solid #dee2e6;
-            overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
+            /* overflow-y: auto; */ /* Tắt cuộn ở đây */
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             
             /* Cập nhật cho transition */
             position: relative; /* Cần để định vị nút thu gọn */
             transition: all 0.3s ease-in-out;
             overflow-x: hidden; /* Ẩn nội dung tràn ra khi thu gọn */
+            
+            /* CẬP NHẬT: Thêm flex cho layout header/content */
+            display: flex;
+            flex-direction: column;
         }
         
+        /* CẬP NHẬT: Header mới cho sidebar */
+        .sidebar-header {
+            display: flex;
+            /* CẬP NHẬT: Quay lại `row` (ngang hàng) */
+            flex-direction: row; 
+            /* CẬP NHẬT: Căn giữa theo chiều dọc */
+            align-items: center;
+            /* CẬP NHẬT: Đẩy 2 nút ra 2 bên */
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            /* gap: 0.5rem; */ /* Xóa */
+            flex-shrink: 0; 
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* CẬP NHẬT: Nút Chuyển đổi Agent */
+        #agent-toggle-btn {
+            /* CẬP NHẬT: Cho co giãn */
+            flex-grow: 1; 
+            /* CẬP NHẬT: Thêm margin trái */
+            margin-left: 0.5rem;
+            transition: all 0.3s ease-in-out;
+            overflow: hidden; /* Ẩn text khi thu hẹp */
+            white-space: nowrap; /* Ngăn text xuống dòng */
+            
+            /* Thêm CSS cho trạng thái active */
+            transition: all 0.3s ease;
+        }
+        
+        /* CẬP NHẬT: Trạng thái Obsidian active */
+        #agent-toggle-btn.agent-obsidian-active {
+            /* Class .btn-primary của Bootstrap sẽ tự xử lý màu */
+        }
+        
+        /* Nút Toggle (Hamburger) */
+        #toggle-sidebar-btn {
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease-in-out; /* Thêm transition cho nút */
+            flex-shrink: 0; /* Ngăn co lại */
+            /* align-self: flex-start; */ /* Xóa */
+        }
+
         /* Wrapper cho nội dung panel để transition mượt hơn */
         .settings-panel-content {
             opacity: 1;
             /* Cập nhật transition */
             transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
             visibility: visible;
+            
+            /* CẬP NHẬT: Cho phép co giãn và cuộn */
+            flex-grow: 1;
+            overflow-y: auto; /* Chỉ cho phép cuộn nội dung này */
+            min-height: 0; /* Fix lỗi flexbox trong Firefox */
         }
 
         /* Cột Chat (Bên phải) */
@@ -106,25 +158,32 @@ body {
 
         /* === CSS CẬP NHẬT CHO KHUNG INPUT === */
         
-        /* Khung Nhập liệu chat */
+        /* CẬP NHẬT: Khung Nhập liệu chat */
         .chat-input-form {
             padding: 1rem 1.5rem;
             border-top: 1px solid #dee2e6;
-            background-color: #ffffff; /* Đổi nền input thành trắng */
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.03); /* Thêm bóng mờ */
+            background-color: #ffffff; 
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.03); 
             z-index: 10;
-        }
-        
-        /* Bọc input-group để tạo kiểu */
-        .chat-input-form .input-group {
+            /* CẬP NHẬT: Sắp xếp input và nút */
             display: flex;
             align-items: center;
+            gap: 0.75rem;
+        }
+        
+        /* CẬP NHẬT: Bọc input-group để tạo kiểu */
+        .chat-input-form .input-group {
+            /* Xóa CSS cũ */
+            /* display: flex; */
+            /* align-items: center; */
             border-radius: 30px; /* Bo tròn pill shape */
             background-color: #f1f3f5;
             border: 1px solid #f1f3f5;
             transition: all 0.3s ease;
-            height: 56px; /* Chiều cao cố định */
-            padding: 0; /* Xóa padding cũ */
+            height: 48px; /* CẬP NHẬT: Giảm chiều cao */
+            padding: 0;
+            /* CẬP NHẬT: Cho phép co giãn */
+            flex-grow: 1; 
         }
 
         /* Trạng thái focus cho input-group (dùng :focus-within) */
@@ -143,7 +202,8 @@ body {
             font-size: 1rem; /* Kích thước chữ tùy chỉnh */
             height: 100%; /* Lấp đầy chiều cao của .input-group */
             flex-grow: 1;
-            border-radius: 30px 0 0 30px; /* Bo tròn trái */
+            /* CẬP NHẬT: Bo tròn cả 2 bên */
+            border-radius: 30px; 
         }
 
         .chat-input-form .form-control:focus {
@@ -155,24 +215,60 @@ body {
             color: #868e96;
         }
 
-        /* Nâng cấp nút gửi */
+        /* CẬP NHẬT: Nâng cấp nút gửi */
         .chat-input-form .btn {
-            border-radius: 0 30px 30px 0; /* Bo tròn phải */
-            width: 56px; /* Chiều rộng nút */
-            height: 100%; /* Chiều cao 100% */
+            border-radius: 50%; /* Bo tròn */
+            width: 48px; /* Chiều rộng nút */
+            height: 48px; /* Chiều cao 100% */
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.15rem; /* Tăng cỡ icon */
             border: none; /* Bỏ border */
-            margin-left: -1px; /* Dính liền vào input */
+            /* margin-left: -1px; */ /* Xóa */
             transition: background-color 0.2s ease, transform 0.1s ease;
+            /* CẬP NHẬT: Ngăn co lại */
+            flex-shrink: 0;
+            
+            /* Thêm để chứa 2 icon */
+            position: relative;
         }
         .chat-input-form .btn:active {
             transform: scale(0.95); /* Hiệu ứng nhấn */
         }
         
         /* === KẾT THÚC CSS CẬP NHẬT === */
+
+        /* === CSS MỚI CHO SPINNER (SỬA LỖI) === */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Cả hai icon đều nằm trong nút */
+        .chat-input-form #send-button .bi {
+            position: absolute;
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+
+        /* Trạng thái MẶC ĐỊNH: Ẩn spinner, hiện icon gửi */
+        .chat-input-form #send-button .bi-send-fill {
+            opacity: 1;
+            transform: scale(1);
+        }
+        /* .chat-input-form #send-button .bi-arrow-repeat {
+            opacity: 0;
+            transform: scale(0.5);
+            animation: spin 1s linear infinite;
+        } */
+
+
+        
+        .bi-arrow-repeat {
+            opacity: 1;
+            animation: spin 1s linear infinite;
+        }
+        /* === KẾT THÚC CSS SPINNER === */
 
 
         /* Style cho bong bóng chat */
@@ -197,7 +293,54 @@ body {
             color: #212529; /* Màu chữ tối hơn */
             align-self: flex-start;
             border-bottom-left-radius: 8px; /* Giữ điểm nhấn */
+            position: relative; /* Cần cho nút lưu */
+            padding-bottom: 2.5rem; /* Thêm không gian cho nút lưu */
         }
+        
+        /* Wrapper nội dung tin nhắn bot */
+        .message.bot .message-content {
+            /* Nội dung gốc của bot */
+        }
+
+        /* Nút Lưu Tin Nhắn (MỚI - LUÔN HIỂN THỊ) */
+        .save-message-btn {
+            position: absolute;
+            bottom: 6px;
+            right: 10px;
+            font-size: 0.9rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 6px;
+            /* opacity: 0; */ /* ĐÃ XÓA - Mặc định hiển thị */
+            transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+            background-color: #ddd;
+            border: 1px solid #ccc;
+            color: #333;
+            
+            /* Thêm để chứa icon */
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        /* Trạng thái đã lưu (bị vô hiệu hóa) */
+        .save-message-btn:disabled {
+            opacity: 1; /* Vẫn hiển thị */
+            background-color: #d1e7dd; /* Màu xanh lá nhạt */
+            border-color: #b1dfc6;
+            color: #0a3622;
+        }
+        
+        /* Ẩn/hiện icon bookmark */
+        .save-message-btn .bi-bookmark-fill {
+            display: none; /* Ẩn icon fill mặc định */
+        }
+        
+        .save-message-btn:disabled .bi-bookmark {
+            display: none; /* Ẩn icon rỗng khi disabled */
+        }
+        .save-message-btn:disabled .bi-bookmark-fill {
+            display: inline-block; /* Hiện icon fill khi disabled */
+        }
+
 
         /* Styling cho nội dung Markdown của Bot */
         .message.bot h1, .message.bot h2, .message.bot h3 {
@@ -291,31 +434,18 @@ body {
 
         /* === CSS MỚI CHO SIDEBAR THU GỌN === */
 
-        /* Nút Toggles (Nút duy nhất) */
-        #toggle-sidebar-btn {
-            position: absolute;
-            top: 1rem; /* Điều chỉnh vị trí */
-            right: 1rem; /* Điều chỉnh vị trí */
-            z-index: 10;
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease-in-out; /* Thêm transition cho nút */
-        }
-
-        /* Nút hiện sidebar (trong chat) - ĐÃ BỊ XÓA */
-        /* #show-sidebar-btn { ... } */
-
         /* Trạng thái khi sidebar bị thu gọn */
         .sidebar-collapsed .settings-panel {
             flex-basis: 70px; /* Thu hẹp lại 70px */
-            padding: 1.5rem 0.5rem; /* Giảm padding ngang */
+            padding-left: 0.5rem; /* Giảm padding ngang */
+            padding-right: 0.5rem;
             transform: translateX(0); /* Reset transform */
             opacity: 1; /* Luôn hiển thị */
+        }
+        
+        /* CẬP NHẬT: Căn giữa các nút khi thu gọn */
+        .sidebar-collapsed .sidebar-header {
+            /* align-items: center; */ /* Xóa */
         }
         
         /* Ẩn nội dung bên trong khi thu gọn */
@@ -325,20 +455,25 @@ body {
             height: 0; /* Giúp ẩn scrollbar */
             overflow: hidden;
         }
-
-        /* Di chuyển nút Toggle khi bị thu gọn */
-        .sidebar-collapsed #toggle-sidebar-btn {
-            right: auto; /* Bỏ right */
-            left: 50%; /* Căn giữa */
-            transform: translateX(-50%); /* Căn giữa tuyệt đối */
+        
+        /* CẬP NHẬT: Ẩn text của nút Chuyển đổi Agent */
+        .sidebar-collapsed .agent-toggle-text {
+            display: none;
         }
-
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        /* CẬP NHẬT: Thu hẹp nút Chuyển đổi Agent */
+        .sidebar-collapsed #agent-toggle-btn {
+            flex-grow: 0; /* Không cho co giãn */
+            width: 32px; /* Bằng kích thước nút toggle */
+            padding-left: 0;
+            padding-right: 0;
+            justify-content: center;
+        }
+        /* CẬP NHẬT: Xóa margin của icon khi thu gọn */
+        .sidebar-collapsed #agent-toggle-btn .agent-toggle-icon {
+            margin-right: 0 !important;
         }
         
-    
-        .bi-arrow-repeat {
-            animation: spin 1s linear infinite;
+        /* === CSS MỚI CHO TOAST (POPUP) === */
+        .toast-container {
+            z-index: 1100; /* Đảm bảo nổi trên modal (nếu cần) */
         }

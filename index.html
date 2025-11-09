@@ -49,21 +49,78 @@
             border-radius: 12px;
             padding: 1.5rem;
             border: 1px solid #dee2e6;
-            overflow-y: auto; /* Cho phép cuộn nếu nội dung dài */
+            /* overflow-y: auto; */ /* Tắt cuộn ở đây */
             box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             
             /* Cập nhật cho transition */
             position: relative; /* Cần để định vị nút thu gọn */
             transition: all 0.3s ease-in-out;
             overflow-x: hidden; /* Ẩn nội dung tràn ra khi thu gọn */
+            
+            /* CẬP NHẬT: Thêm flex cho layout header/content */
+            display: flex;
+            flex-direction: column;
         }
         
+        /* CẬP NHẬT: Header mới cho sidebar */
+        .sidebar-header {
+            display: flex;
+            /* CẬP NHẬT: Quay lại `row` (ngang hàng) */
+            flex-direction: row; 
+            /* CẬP NHẬT: Căn giữa theo chiều dọc */
+            align-items: center;
+            /* CẬP NHẬT: Đẩy 2 nút ra 2 bên */
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            /* gap: 0.5rem; */ /* Xóa */
+            flex-shrink: 0; 
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* CẬP NHẬT: Nút Chuyển đổi Agent */
+        #agent-toggle-btn {
+            /* CẬP NHẬT: Cho co giãn */
+            flex-grow: 1; 
+            /* CẬP NHẬT: Thêm margin trái */
+            margin-left: 0.5rem;
+            transition: all 0.3s ease-in-out;
+            overflow: hidden; /* Ẩn text khi thu hẹp */
+            white-space: nowrap; /* Ngăn text xuống dòng */
+            
+            /* Thêm CSS cho trạng thái active */
+            transition: all 0.3s ease;
+        }
+        
+        /* CẬP NHẬT: Trạng thái Obsidian active */
+        #agent-toggle-btn.agent-obsidian-active {
+            /* Class .btn-primary của Bootstrap sẽ tự xử lý màu */
+        }
+        
+        /* Nút Toggle (Hamburger) */
+        #toggle-sidebar-btn {
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease-in-out; /* Thêm transition cho nút */
+            flex-shrink: 0; /* Ngăn co lại */
+            /* align-self: flex-start; */ /* Xóa */
+        }
+
         /* Wrapper cho nội dung panel để transition mượt hơn */
         .settings-panel-content {
             opacity: 1;
             /* Cập nhật transition */
             transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
             visibility: visible;
+            
+            /* CẬP NHẬT: Cho phép co giãn và cuộn */
+            flex-grow: 1;
+            overflow-y: auto; /* Chỉ cho phép cuộn nội dung này */
+            min-height: 0; /* Fix lỗi flexbox trong Firefox */
         }
 
         /* Cột Chat (Bên phải) */
@@ -96,25 +153,32 @@
 
         /* === CSS CẬP NHẬT CHO KHUNG INPUT === */
         
-        /* Khung Nhập liệu chat */
+        /* CẬP NHẬT: Khung Nhập liệu chat */
         .chat-input-form {
             padding: 1rem 1.5rem;
             border-top: 1px solid #dee2e6;
-            background-color: #ffffff; /* Đổi nền input thành trắng */
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.03); /* Thêm bóng mờ */
+            background-color: #ffffff; 
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.03); 
             z-index: 10;
-        }
-        
-        /* Bọc input-group để tạo kiểu */
-        .chat-input-form .input-group {
+            /* CẬP NHẬT: Sắp xếp input và nút */
             display: flex;
             align-items: center;
+            gap: 0.75rem;
+        }
+        
+        /* CẬP NHẬT: Bọc input-group để tạo kiểu */
+        .chat-input-form .input-group {
+            /* Xóa CSS cũ */
+            /* display: flex; */
+            /* align-items: center; */
             border-radius: 30px; /* Bo tròn pill shape */
             background-color: #f1f3f5;
             border: 1px solid #f1f3f5;
             transition: all 0.3s ease;
-            height: 56px; /* Chiều cao cố định */
-            padding: 0; /* Xóa padding cũ */
+            height: 48px; /* CẬP NHẬT: Giảm chiều cao */
+            padding: 0;
+            /* CẬP NHẬT: Cho phép co giãn */
+            flex-grow: 1; 
         }
 
         /* Trạng thái focus cho input-group (dùng :focus-within) */
@@ -133,7 +197,8 @@
             font-size: 1rem; /* Kích thước chữ tùy chỉnh */
             height: 100%; /* Lấp đầy chiều cao của .input-group */
             flex-grow: 1;
-            border-radius: 30px 0 0 30px; /* Bo tròn trái */
+            /* CẬP NHẬT: Bo tròn cả 2 bên */
+            border-radius: 30px; 
         }
 
         .chat-input-form .form-control:focus {
@@ -145,18 +210,23 @@
             color: #868e96;
         }
 
-        /* Nâng cấp nút gửi */
+        /* CẬP NHẬT: Nâng cấp nút gửi */
         .chat-input-form .btn {
-            border-radius: 0 30px 30px 0; /* Bo tròn phải */
-            width: 56px; /* Chiều rộng nút */
-            height: 100%; /* Chiều cao 100% */
+            border-radius: 50%; /* Bo tròn */
+            width: 48px; /* Chiều rộng nút */
+            height: 48px; /* Chiều cao 100% */
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.15rem; /* Tăng cỡ icon */
             border: none; /* Bỏ border */
-            margin-left: -1px; /* Dính liền vào input */
+            /* margin-left: -1px; */ /* Xóa */
             transition: background-color 0.2s ease, transform 0.1s ease;
+            /* CẬP NHẬT: Ngăn co lại */
+            flex-shrink: 0;
+            
+            /* Thêm để chứa 2 icon */
+            position: relative;
         }
         .chat-input-form .btn:active {
             transform: scale(0.95); /* Hiệu ứng nhấn */
@@ -170,21 +240,31 @@
             to { transform: rotate(360deg); }
         }
         
+        /* Cả hai icon đều nằm trong nút */
+        .chat-input-form #send-button .bi {
+            position: absolute;
+            transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+        }
+
         /* Trạng thái MẶC ĐỊNH: Ẩn spinner, hiện icon gửi */
         .chat-input-form #send-button .bi-send-fill {
-            display: inline-block;
+            opacity: 1;
+            transform: scale(1);
         }
         .chat-input-form #send-button .bi-arrow-repeat {
-            display: none;
+            opacity: 0;
+            transform: scale(0.5);
             animation: spin 1s linear infinite;
         }
 
         /* Trạng thái LOADING: Ẩn icon gửi, hiện spinner */
         .chat-input-form.is-loading #send-button .bi-send-fill {
-            display: none;
+            opacity: 0;
+            transform: scale(0.5);
         }
         .chat-input-form.is-loading #send-button .bi-arrow-repeat {
-            display: inline-block;
+            opacity: 1;
+            transform: scale(1);
         }
         /* === KẾT THÚC CSS SPINNER === */
 
@@ -211,7 +291,54 @@
             color: #212529; /* Màu chữ tối hơn */
             align-self: flex-start;
             border-bottom-left-radius: 8px; /* Giữ điểm nhấn */
+            position: relative; /* Cần cho nút lưu */
+            padding-bottom: 2.5rem; /* Thêm không gian cho nút lưu */
         }
+        
+        /* Wrapper nội dung tin nhắn bot */
+        .message.bot .message-content {
+            /* Nội dung gốc của bot */
+        }
+
+        /* Nút Lưu Tin Nhắn (MỚI - LUÔN HIỂN THỊ) */
+        .save-message-btn {
+            position: absolute;
+            bottom: 6px;
+            right: 10px;
+            font-size: 0.9rem;
+            padding: 0.1rem 0.4rem;
+            border-radius: 6px;
+            /* opacity: 0; */ /* ĐÃ XÓA - Mặc định hiển thị */
+            transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+            background-color: #ddd;
+            border: 1px solid #ccc;
+            color: #333;
+            
+            /* Thêm để chứa icon */
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        /* Trạng thái đã lưu (bị vô hiệu hóa) */
+        .save-message-btn:disabled {
+            opacity: 1; /* Vẫn hiển thị */
+            background-color: #d1e7dd; /* Màu xanh lá nhạt */
+            border-color: #b1dfc6;
+            color: #0a3622;
+        }
+        
+        /* Ẩn/hiện icon bookmark */
+        .save-message-btn .bi-bookmark-fill {
+            display: none; /* Ẩn icon fill mặc định */
+        }
+        
+        .save-message-btn:disabled .bi-bookmark {
+            display: none; /* Ẩn icon rỗng khi disabled */
+        }
+        .save-message-btn:disabled .bi-bookmark-fill {
+            display: inline-block; /* Hiện icon fill khi disabled */
+        }
+
 
         /* Styling cho nội dung Markdown của Bot */
         .message.bot h1, .message.bot h2, .message.bot h3 {
@@ -305,28 +432,18 @@
 
         /* === CSS MỚI CHO SIDEBAR THU GỌN === */
 
-        /* Nút Toggles (Nút duy nhất) */
-        #toggle-sidebar-btn {
-            position: absolute;
-            top: 1rem; /* Điều chỉnh vị trí */
-            right: 1rem; /* Điều chỉnh vị trí */
-            z-index: 10;
-            border-radius: 8px;
-            width: 32px;
-            height: 32px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease-in-out; /* Thêm transition cho nút */
-        }
-
         /* Trạng thái khi sidebar bị thu gọn */
         .sidebar-collapsed .settings-panel {
             flex-basis: 70px; /* Thu hẹp lại 70px */
-            padding: 1.5rem 0.5rem; /* Giảm padding ngang */
+            padding-left: 0.5rem; /* Giảm padding ngang */
+            padding-right: 0.5rem;
             transform: translateX(0); /* Reset transform */
             opacity: 1; /* Luôn hiển thị */
+        }
+        
+        /* CẬP NHẬT: Căn giữa các nút khi thu gọn */
+        .sidebar-collapsed .sidebar-header {
+            /* align-items: center; */ /* Xóa */
         }
         
         /* Ẩn nội dung bên trong khi thu gọn */
@@ -336,12 +453,22 @@
             height: 0; /* Giúp ẩn scrollbar */
             overflow: hidden;
         }
-
-        /* Di chuyển nút Toggle khi bị thu gọn */
-        .sidebar-collapsed #toggle-sidebar-btn {
-            right: auto; /* Bỏ right */
-            left: 50%; /* Căn giữa */
-            transform: translateX(-50%); /* Căn giữa tuyệt đối */
+        
+        /* CẬP NHẬT: Ẩn text của nút Chuyển đổi Agent */
+        .sidebar-collapsed .agent-toggle-text {
+            display: none;
+        }
+        /* CẬP NHẬT: Thu hẹp nút Chuyển đổi Agent */
+        .sidebar-collapsed #agent-toggle-btn {
+            flex-grow: 0; /* Không cho co giãn */
+            width: 32px; /* Bằng kích thước nút toggle */
+            padding-left: 0;
+            padding-right: 0;
+            justify-content: center;
+        }
+        /* CẬP NHẬT: Xóa margin của icon khi thu gọn */
+        .sidebar-collapsed #agent-toggle-btn .agent-toggle-icon {
+            margin-right: 0 !important;
         }
         
         /* === CSS MỚI CHO TOAST (POPUP) === */
@@ -360,10 +487,20 @@
         <!-- ======================================= -->
         <aside class="settings-panel">
 
-            <!-- NÚT TOGGLE MỚI (Thay thế 2 nút cũ) -->
-            <button class="btn btn-sm btn-outline-secondary" id="toggle-sidebar-btn" title="Thu/mở sidebar">
-                <i class="bi bi-list"></i>
-            </button>
+            <!-- CẬP NHẬT: Header mới cho sidebar -->
+            <div class="sidebar-header">
+                <!-- NÚT TOGGLE (Hamburger) -->
+                <button class="btn btn-sm btn-outline-secondary" id="toggle-sidebar-btn" title="Thu/mở sidebar">
+                    <i class="bi bi-list"></i>
+                </button>
+                
+                <!-- CẬP NHẬT: NÚT CHUYỂN ĐỔI AGENT -->
+                <button class="btn btn-outline-secondary text-start" id="agent-toggle-btn">
+                    <i class="bi bi-stars agent-toggle-icon me-2"></i> 
+                    <span class="agent-toggle-text">Origin Agent</span>
+                </button>
+            </div>
+
 
             <!-- Wrapper nội dung để transition -->
             <div class="settings-panel-content">
@@ -511,22 +648,31 @@
             <div class="chat-history" id="chat-history">
                 <!-- Tin nhắn mẫu của Bot -->
                 <div class="message bot">
-                    Xin chào! Tôi là AI Chat Bot. Bạn có thể nhập instruction và format ở cột bên trái để tùy chỉnh cách tôi trả lời.
-                    <br>
-                    Nhấn vào nút <i class="bi bi-list"></i> ở bên trái để thu gọn sidebar.
+                    <!-- NỘI DUNG TIN NHẮN (BỌC LẠI) -->
+                    <div class="message-content">
+                        Xin chào! Tôi là AI Chat Bot. Bạn có thể nhập instruction và format ở cột bên trái để tùy chỉnh cách tôi trả lời.
+                        <br>
+                        Nhấn vào nút <i class="bi bi-list"></i> ở bên trái để thu gọn sidebar.
+                    </div>
+                    <!-- NÚT LƯU MỚI -->
+                    <button class="btn btn-sm save-message-btn" title="Lưu tin nhắn">
+                        <i class="bi bi-bookmark me-1"></i>
+                        <i class="bi bi-bookmark-fill me-1"></i>
+                        <span>Lưu</span>
+                    </button>
                 </div>
             </div>
 
             <!-- Form nhập liệu -->
+            <!-- CẬP NHẬT: Tách input và button -->
             <form class="chat-input-form" id="chat-form">
                 <div class="input-group">
                     <input type="text" id="chat-input" class="form-control" placeholder="Nhập tin nhắn của bạn..." autocomplete="off">
-                    <button class="btn btn-primary" type="submit" id="send-button">
-                        <i class="bi bi-send-fill"></i>
-                        <!-- SỬA LỖI: Xóa class 'd-none' -->
-                        <i class="bi bi-arrow-repeat"></i> 
-                    </button>
                 </div>
+                <button class="btn btn-primary" type="submit" id="send-button">
+                    <i class="bi bi-send-fill"></i>
+                    <i class="bi bi-arrow-repeat"></i> 
+                </button>
             </form>
         </main>
     </div>
@@ -545,7 +691,7 @@
                 <div class="modal-body">
                     <p>Nhấn vào một format để tải nó vào trình chỉnh sửa.</p>
                     <ul class="list-group" id="modal-format-list">
-                        <!-- Danh sách format sẽ được thêm bằng JS -->
+                        <!-- Danh sách format sẽ được thêm vào đây bằng JS -->
                     </ul>
                 </div>
             </div>
@@ -558,7 +704,7 @@
     <!-- ======================================= -->
     <div class="toast-container position-fixed top-0 end-0 p-3">
         <!-- CẬP NHẬT: Thêm class .show để hiển thị mặc định -->
-        <div id="genericToast" class="toast show" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+        <div id="genericToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
             <div class="toast-header">
                 <i class="bi bi-check-circle-fill me-2"></i> <!-- Icon sẽ thay đổi -->
                 <strong class="me-auto">Thông báo</strong>
@@ -589,6 +735,8 @@
             const resetAgent1Btn = document.getElementById('reset-agent-1-btn'); // NÚT MỚI
             // const saveInstructionsStatus = document.getElementById('save-instructions-status'); // Đã xóa
             const instructionToggles = document.querySelectorAll('.instruction-toggle');
+            // CẬP NHẬT: Đổi tên biến
+            const agentToggleBtn = document.getElementById('agent-toggle-btn'); 
 
             // Elements cho Format
             const formatPairsContainer = document.getElementById('format-pairs-container');
@@ -612,8 +760,6 @@
             const bsToast = new bootstrap.Toast(genericToastEl); // Tự động ẩn sau 3s (thiết lập qua data-bs-delay)
 
             // === ELEMENT MỚI CHO SIDEBAR ===
-            // const hideSidebarBtn = document.getElementById('hide-sidebar-btn'); // Cũ
-            // const showSidebarBtn = document.getElementById('show-sidebar-btn'); // Cũ
             const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn'); // Nút mới
             const mainLayout = document.querySelector('.main-layout');
 
@@ -638,17 +784,10 @@
                 
                 // Cập nhật icon và title cho nút
                 const isCollapsed = mainLayout.classList.contains('sidebar-collapsed');
-                // const icon = toggleSidebarBtn.querySelector('i'); // Đã xóa logic thay đổi icon
                 
                 if (isCollapsed) {
-                    // Chuyển sang icon "Mở"
-                    // icon.classList.remove('bi-chevron-bar-left'); // Đã xóa
-                    // icon.classList.add('bi-chevron-bar-right'); // Đã xóa
                     toggleSidebarBtn.title = 'Mở sidebar';
                 } else {
-                    // Chuyển sang icon "Đóng"
-                    // icon.classList.remove('bi-chevron-bar-right'); // Đã xóa
-                    // icon.classList.add('bi-chevron-bar-left'); // Đã xóa
                     toggleSidebarBtn.title = 'Thu gọn sidebar';
                 }
             });
@@ -685,6 +824,55 @@
                 e.preventDefault(); // Ngăn form submit (nếu có)
                 handleResetAgent('1');
             });
+            
+            // CẬP NHẬT: Gán sự kiện cho nút Chuyển đổi Agent
+            agentToggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                
+                // Lấy các element con
+                const icon = agentToggleBtn.querySelector('.agent-toggle-icon');
+                const text = agentToggleBtn.querySelector('.agent-toggle-text');
+                
+                // 1. Kiểm tra trạng thái hiện tại bằng cách kiểm tra class
+                const isObsidian = agentToggleBtn.classList.contains('agent-obsidian-active');
+
+                if (isObsidian) {
+                    // === Chuyển về Origin Agent ===
+                    // Cập nhật nút
+                    agentToggleBtn.classList.remove('agent-obsidian-active');
+                    agentToggleBtn.classList.remove('btn-primary');
+                    agentToggleBtn.classList.add('btn-outline-secondary');
+                    
+                    // Cập nhật icon
+                    icon.classList.remove('bi-gem');
+                    icon.classList.add('bi-stars');
+                    
+                    // Cập nhật text
+                    text.textContent = 'Origin Agent';
+                    
+                    // Hiển thị thông báo
+                    showToast('Đã chuyển sang Origin Agent', 'success');
+                    console.log("Đã chuyển sang Origin Agent");
+
+                } else {
+                    // === Chuyển sang Obsidian Agent ===
+                    // Cập nhật nút
+                    agentToggleBtn.classList.add('agent-obsidian-active');
+                    agentToggleBtn.classList.remove('btn-outline-secondary');
+                    agentToggleBtn.classList.add('btn-primary');
+                    
+                    // Cập nhật icon
+                    icon.classList.remove('bi-stars');
+                    icon.classList.add('bi-gem');
+                    
+                    // Cập nhật text
+                    text.textContent = 'Obsidian Agent';
+                    
+                    // Hiển thị thông báo
+                    showToast('Đã chuyển sang Obsidian Agent', 'success');
+                    console.log("Đã chuyển sang Obsidian Agent");
+                }
+            });
 
 
             // === HÀM MỚI ĐỂ HIỂN THỊ TOAST (POPUP) ===
@@ -707,7 +895,7 @@
                 } else {
                     genericToastEl.classList.remove('text-bg-danger');
                     genericToastEl.classList.add('text-bg-success');
-                    genericToastHeaderIcon.classList.remove('bi-check-circle-fill');
+                    genericToastHeaderIcon.classList.remove('bi-exclamation-triangle-fill');
                     genericToastHeaderIcon.classList.add('bi-check-circle-fill');
                 }
 
@@ -1119,8 +1307,17 @@
                 messageElement.classList.add('message', sender);
 
                 if (sender === 'bot') {
-                    // Nếu là bot, dùng innerHTML để render Markdown đã được parse
-                    messageElement.innerHTML = message;
+                    // CẬP NHẬT: Bọc nội dung bot trong div và thêm nút lưu
+                    messageElement.innerHTML = `
+                        <div class="message-content">
+                            ${message}
+                        </div>
+                        <button class="btn btn-sm save-message-btn" title="Lưu tin nhắn">
+                            <i class="bi bi-bookmark me-1"></i>
+                            <i class="bi bi-bookmark-fill me-1"></i>
+                            <span>Lưu</span>
+                        </button>
+                    `;
                 } else {
                     // Nếu là user, dùng textContent để tránh XSS
                     messageElement.textContent = message;
@@ -1130,6 +1327,33 @@
                 // Tự động cuộn xuống tin nhắn mới nhất
                 chatHistory.scrollTop = chatHistory.scrollHeight;
             }
+            
+            // === SỰ KIỆN LƯU TIN NHẮN (MỚI) ===
+            chatHistory.addEventListener('click', function(e) {
+                // Sử dụng ủy quyền sự kiện để bắt click vào nút .save-message-btn
+                const saveBtn = e.target.closest('.save-message-btn');
+                
+                if (saveBtn) {
+                    // 1. Lấy nội dung tin nhắn (HTML)
+                    const messageElement = saveBtn.closest('.message.bot');
+                    const messageContent = messageElement.querySelector('.message-content').innerHTML;
+
+                    // 2. Mô phỏng lưu vào CSDL (in ra console)
+                    console.log("Đã lưu tin nhắn vào CSDL (mô phỏng):", messageContent);
+
+                    // 3. Cập nhật UI của nút
+                    saveBtn.disabled = true;
+                    
+                    // CẬP NHẬT: Thay đổi text bên trong span
+                    const buttonText = saveBtn.querySelector('span');
+                    if (buttonText) {
+                        buttonText.textContent = 'Đã lưu';
+                    }
+
+                    // 4. Hiển thị thông báo toast
+                    showToast('Đã lưu tin nhắn!', 'success');
+                }
+            });
 
             /**
              * Mô phỏng AI tạo câu trả lời
@@ -1159,7 +1383,7 @@
                 if (instruction.includes("ngắn gọn")) {
                     rawAnswer = `Trả lời ngắn: "${userMessage}".`;
                 } else if (instruction.includes("chuyên gia")) {
-                    rawAnswer = `Theo phân tích của chuyên gia, câu trả lời cho "${userMessage}" là... bla bla.`;
+                    rawAnswer = `Theo phân tích của chuyên gia, câu trảV lời cho "${userMessage}" là... bla bla.`;
                 }
 
                 // Thêm thông tin về header (nếu có)
@@ -1241,4 +1465,3 @@
 
 </body>
 </html>
-

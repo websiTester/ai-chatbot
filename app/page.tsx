@@ -13,7 +13,7 @@ export default function Home() {
  const [formatDetail, setFormatDetail] = useState<any>(null)
  const [showNotification, setShowNotification] = useState(false);
  const [isCollapsed, setIsCollapsed] = useState(false);
-
+ const [isOriginAgent, setIsOriginAgent] = useState(true);
  useEffect(() => {
    const initFormat = async () => {
       const res = await fetch(`/api/format/name?name=${encodeURIComponent("Default")}`);
@@ -27,10 +27,11 @@ export default function Home() {
   return (
     <div>
       <div className={`main-layout ${isCollapsed?"sidebar-collapsed":""}`}>
-      <SideBar setIsCollapsed={setIsCollapsed} isCollapsed={isCollapsed}
+      <SideBar isOriginAgent={isOriginAgent} setIsOriginAgent={setIsOriginAgent}
+      setIsCollapsed={setIsCollapsed} isCollapsed={isCollapsed}
       setShowNotification={setShowNotification}
       formatDetail={formatDetail} onOpen={() => setIsOpen(true)}></SideBar>
-      <Form/>
+      <Form isOriginAgent={isOriginAgent}/>
     </div>
     <FormatModal 
           setFormatDetail = {setFormatDetail}

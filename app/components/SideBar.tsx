@@ -10,11 +10,14 @@ type Props = {
     formatDetail: any;
     setShowNotification: any,
     setIsCollapsed: any,
-    isCollapsed: boolean
+    isCollapsed: boolean,
+    isOriginAgent?: boolean,
+    setIsOriginAgent: any,
 };
 
 
-export default function SideBar({setIsCollapsed,isCollapsed, setShowNotification, onOpen, formatDetail }: Props) {
+export default function SideBar({isOriginAgent, setIsOriginAgent,
+    setIsCollapsed,isCollapsed, setShowNotification, onOpen, formatDetail }: Props) {
 
     const [agent1Mode, setAgent1Mode] = useState("default");
     const [agent2Mode, setAgent2Mode] = useState("default");
@@ -23,6 +26,7 @@ export default function SideBar({setIsCollapsed,isCollapsed, setShowNotification
     const [instructions, setInstruction] = useState<string[]>([]);
 
     const [functionAgents, setFunctionAgents] = useState<any[][]>([]);
+    
 
     
 
@@ -113,9 +117,27 @@ export default function SideBar({setIsCollapsed,isCollapsed, setShowNotification
     return (
         <aside className="settings-panel">
 
-            <button onClick={() => setIsCollapsed(!isCollapsed)} className="btn btn-sm btn-outline-secondary" id="toggle-sidebar-btn" title="Thu/mở sidebar">
+            
+            <div className="sidebar-header">
+                <button onClick={() => setIsCollapsed(!isCollapsed)} className="btn btn-sm btn-outline-secondary" id="toggle-sidebar-btn" title="Thu/mở sidebar">
                 <i className="bi bi-list"></i>
             </button>
+                {
+                    isOriginAgent ? (
+                        <button onClick={() => setIsOriginAgent(false)} className="btn text-start btn-outline-secondary" id="agent-toggle-btn">
+                            <i className="bi agent-toggle-icon me-2 bi-stars"></i> 
+                            <span className="agent-toggle-text">Origin Agent</span>
+                        </button>
+                    ):(
+                        <button  onClick={() => setIsOriginAgent(true)} className="btn text-start agent-obsidian-active btn-primary" id="agent-toggle-btn">
+                            <i className="bi agent-toggle-icon me-2 bi-gem"></i> 
+                            <span className="agent-toggle-text">Obsidian Agent</span>
+                        </button>
+                    )
+                }
+                
+                
+            </div>
 
             <div className="settings-panel-content">
 
@@ -256,6 +278,8 @@ export default function SideBar({setIsCollapsed,isCollapsed, setShowNotification
 
                         </div>
 
+
+                      
 
                         <button disabled={isSaving} type="submit" className="btn btn-success w-100 mt-2" id="save-instructions-btn">
                             {
