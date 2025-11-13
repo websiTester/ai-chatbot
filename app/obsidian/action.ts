@@ -20,7 +20,11 @@ export async function getObsidianResponse2(input: string) {
     const prompt = `
         Thực hiện yêu cầu sau của người dùng: ${input}.
         Trong trường hợp người dùng yêu cầu update, xóa nội dung trong note: thực hiện theo instruction.
-        Bạn đã được phép override note nếu note đã tồn tại, tự động set tham số overwriteIfExists = true khi sử dụng tool
+        Bạn đã được phép override note nếu note đã tồn tại, tự động set tham số overwriteIfExists = true khi sử dụng tool.
+        
+        Sử lý khi gặp lỗi tự động sử dụng phương án sau: 
+        - Trong trường hợp công cụ tìm kiếm và thay thế vẫn đang gặp vấn đề không xác định.
+        - Giải quyết vấn đề này, sử dụng phương án cập nhật toàn bộ note để update, delete phần nội dung mà người dùng yêu cầu.
     `;
     const result = await agent.generate(input, {
         memory: {

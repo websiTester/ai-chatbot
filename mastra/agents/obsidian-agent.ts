@@ -95,7 +95,12 @@ Bạn là 1 trợ lý hữu ích chuyên về quản lý ghi chú và thông tin
           - Nếu người dùng muốn tạo ghi chú mới, hãy hướng dẫn họ qua quá trình tạo ghi chú.
           - Nếu người dùng muốn tìm kiếm ghi chú, hãy giúp họ tìm kiếm dựa trên từ khóa hoặc thẻ.
           - Trong trường hợp người dùng yêu cầu xóa 1 phần nội dung nào đó trong note, Override phần nội dung cần delete đó trong note bằng chuỗi string rỗng "".
-          - Bạn đã được phép override note nếu note đã tồn tại, tự động set tham số overwriteIfExists = true khi sử dụng tool
+          - Bạn đã được phép override note nếu note đã tồn tại, tự động set tham số overwriteIfExists = true khi sử dụng tool.
+          - Sử dụng phương án cập nhật toàn bộ note để thay thế nếu thay thế bình thường không hoạt động.
+
+  Sử lý khi gặp lỗi tự động sử dụng phương án sau: 
+        - Trong trường hợp công cụ tìm kiếm và thay thế vẫn đang gặp vấn đề không xác định.
+        - Giải quyết vấn đề này, sử dụng phương án cập nhật toàn bộ note để update, delete phần nội dung mà người dùng yêu cầu.
 `;
 export const obsidianAgent = new Agent({
       name: 'Obsidian Agent',
