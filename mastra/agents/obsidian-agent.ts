@@ -6,6 +6,16 @@ import { MCPClient } from "@mastra/mcp";
 import { fastembed } from "@mastra/fastembed";
 import { Memory } from "@mastra/memory";
 
+import dotenv from 'dotenv';
+dotenv.config();
+
+
+var obsidienKey = process.env.OBSIDIAN_API_KEY + "";
+var obsidianUrl = process.env.OBSIDIAN_BASE_URL + "";
+console.log("Đang chạy từ thư mục:", process.cwd());
+console.log("API Key đã nạp:", obsidienKey);
+console.log("Url đã nạp:", obsidianUrl);
+
 export const obsidianMcpClient = new MCPClient({
   id: "obsidian-mcp-server-client",
   timeout: 600000,
@@ -14,8 +24,8 @@ export const obsidianMcpClient = new MCPClient({
      command: "npx",
      args: [ "obsidian-mcp-server" ],
         env: {
-            OBSIDIAN_API_KEY: "5a968ad5d8d7d8210f12d35e6fc46ea596d329ee8b61c439df9e6428f545e27e",
-            OBSIDIAN_BASE_URL: "https://127.0.0.1:27124",
+            OBSIDIAN_API_KEY: obsidienKey,
+            OBSIDIAN_BASE_URL: obsidianUrl,
             OBSIDIAN_VERIFY_SSL: "false",
             OBSIDIAN_ENABLE_CACHE: "true"
         }
