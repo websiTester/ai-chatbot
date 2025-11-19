@@ -1,11 +1,8 @@
 import { LibSQLStore } from "@mastra/libsql";
 import { Memory } from "@mastra/memory";
 import { Agent } from "@mastra/core/agent";
-import { analyzeTool } from "../tools/analyze-tool";
-import { templateTool } from "../tools/template-tool";
-import { getTemplateTool } from "../tools/get-template-tool";
 import { shortTool } from "../tools/short-tool";
-import { obsidianTool } from "../tools/obsidian-tool";
+
 
 
 const instruction = `
@@ -27,10 +24,38 @@ export const finalShortAgent = new Agent({
   tools: {shortTool},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
+
+
+// let finalShortAgentInstance: Agent | null = null;
+
+// // Hàm này sẽ lấy agent, hoặc tạo mới nếu chưa có
+// export async function getFinalShortAgent() {
+//   // Nếu đã khởi tạo, trả về ngay
+//   if (finalShortAgentInstance) {
+//     return finalShortAgentInstance;
+//   }
+
+
+//   finalShortAgentInstance = new Agent({
+//       name: 'Short Final Agent',
+//       instructions: `
+//             ${instruction}
+//             `,
+//       model: 'google/gemini-2.0-flash',
+//       tools: {shortTool},
+//       memory: new Memory({
+//         storage: new LibSQLStore({
+//           url: 'file:./mastra.db',
+//         }),
+//       }),
+//     });
+
+//   return finalShortAgentInstance;
+// }
 
 
 

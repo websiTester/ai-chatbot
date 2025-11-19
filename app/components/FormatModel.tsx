@@ -43,7 +43,7 @@ export default function FormatModal({ isOpen, onClose, setFormatDetail}: any) {
     }
 
     return (
-        <div className={`modal fade ${isOpen ? "show" : ""}`} style={{ display: isOpen ? "block" : "none" }} id="formatsModal" tabIndex={-1} aria-labelledby="formatsModalLabel" aria-hidden="true">
+        <div className={`modal fade ${isOpen ? "show" : ""}`} style={{ background: "#00000054",display: isOpen ? "block" : "none" }} id="formatsModal" tabIndex={-1} aria-labelledby="formatsModalLabel" aria-hidden="true">
             <div className="modal-dialog modal-lg modal-dialog-scrollable" >
                 <div className="modal-content">
                     <div className="modal-header">

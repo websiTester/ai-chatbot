@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["@mastra/*"],
+  // output: 'standalone',
+  serverExternalPackages: ["@mastra/*","@anush008/tokenizers"],
 };
 
 export default nextConfig;

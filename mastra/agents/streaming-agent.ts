@@ -12,7 +12,7 @@ export const streamingAgent = new Agent({
   tools: {streamingTool},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });

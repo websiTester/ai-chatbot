@@ -10,12 +10,12 @@ import { streamingAgent } from './agents/streaming-agent';
 import { getTemplateWorkflow } from './workflows/get-template-workflow';
 import { shortWorkflow } from './workflows/short-workflow';
 import { finalShortAgent } from './agents/final-short-agent';
-import { obsidianAgent } from './agents/obsidian-agent';
+//import { obsidianAgent } from './agents/obsidian-agent';
 
 const globalForMastra = globalThis as unknown as { mastra: Mastra };
 export const mastra = globalForMastra.mastra || new Mastra({
   workflows: {ecommerceWorkflow, getTemplateWorkflow, shortWorkflow},
-  agents: { weatherAgent, finalAgent, streamingAgent, finalShortAgent, obsidianAgent},
+  agents: { weatherAgent, finalAgent, streamingAgent, finalShortAgent},
   storage: new LibSQLStore({
     // stores observability, scores, ... into memory storage, if it needs to persist, change to file:../mastra.db
     url: ":memory:",
@@ -33,4 +33,8 @@ export const mastra = globalForMastra.mastra || new Mastra({
     default: { enabled: true }, 
   },
 });
-if (process.env.NODE_ENV !== "production") globalForMastra.mastra = mastra;
+// if (process.env.NODE_ENV !== "production") globalForMastra.mastra = mastra;
+
+if (!globalForMastra.mastra) {
+  globalForMastra.mastra = mastra;
+}

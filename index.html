@@ -405,6 +405,13 @@
             gap: 0.5rem;
         }
         
+        /* CẬP NHẬT: Wrapper cho các nút header của Format */
+        .format-header-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0; /* Ngăn các nút bị co lại */
+        }
+
         /* Ẩn/hiện textarea của instruction */
         .instruction-textarea {
             display: none; /* Mặc định ẩn, JS sẽ xử lý */
@@ -507,7 +514,13 @@
 
                 <!-- PHẦN INSTRUCTIONS -->
                 <div class="mb-4">
-                    <h2 class="settings-title">Instructions</h2>
+                    <!-- CẬP NHẬT: Thêm d-flex để chứa title và nút README -->
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h2 class="settings-title" style="margin-bottom: 0; border: none;">Instructions</h2>
+                        <button class="btn btn-sm btn-outline-info" id="readme-btn" data-bs-toggle="modal" data-bs-target="#readmeModal">
+                            <i class="bi bi-info-circle-fill"></i> README
+                        </button>
+                    </div>
                     
                     <!-- Agent 1 -->
                     <div class="agent-block">
@@ -602,11 +615,15 @@
 
                 <!-- PHẦN FORMAT -->
                 <div>
+                    <!-- CẬP NHẬT: Thêm div.format-header-buttons và nút README -->
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h2 class="settings-title" style="margin-bottom: 0; border: none;">Format</h2>
-                        <button class="btn btn-sm btn-outline-primary" id="view-all-formats-btn" data-bs-toggle="modal" data-bs-target="#formatsModal">
-                            <i class="bi bi-grid-3x3-gap-fill"></i> Xem tất cả
-                        </button>
+                        <div class="format-header-buttons">
+                            <!-- Nút README đã được di chuyển lên trên -->
+                            <button class="btn btn-sm btn-outline-primary" id="view-all-formats-btn" data-bs-toggle="modal" data-bs-target="#formatsModal">
+                                <i class="bi bi-grid-3x3-gap-fill"></i> Xem tất cả
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Tên Format hiện tại -->
@@ -700,10 +717,53 @@
 
 
     <!-- ======================================= -->
+    <!-- MODAL HƯỚNG DẪN (README) - MỚI -->
+    <!-- ======================================= -->
+    <div class="modal fade" id="readmeModal" tabindex="-1" aria-labelledby="readmeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="readmeModalLabel"><i class="bi bi-info-circle-fill"></i> Hướng dẫn Cài đặt & Sử dụng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Đây là một dự án web độc lập (standalone) chạy hoàn toàn trên trình duyệt.</p>
+                    
+                    <h4>Yêu cầu</h4>
+                    <ul>
+                        <li>Một trình duyệt web hiện đại (ví dụ: Chrome, Firefox, Safari, Edge).</li>
+                        <li>Kết nối Internet (bắt buộc, để tải thư viện Bootstrap, Bootstrap Icons, và Marked.js từ CDN).</li>
+                    </ul>
+
+                    <h4>Cách chạy dự án</h4>
+                    <ol>
+                        <li><strong>Lưu tệp:</strong> Sao chép toàn bộ mã nguồn từ tệp <code>index.html</code> này và lưu vào một tệp có tên <code>index.html</code> trên máy tính của bạn.</li>
+                        <li><strong>Mở tệp:</strong> Nhấp đúp chuột vào tệp <code>index.html</code> vừa lưu. Tệp sẽ tự động mở trong trình duyệt web mặc định của bạn.</li>
+                    </ol>
+                    
+                    <h4>Các tính năng</h4>
+                    <ul>
+                        <li><strong>Giao diện Chat:</strong> Gửi tin nhắn và nhận phản hồi (được mô phỏng).</li>
+                        <li><strong>Tùy chỉnh Agent:</strong> Cài đặt "instructions" cho 4 agent khác nhau.</li>
+                        <li><strong>Tùy chỉnh Format:</strong> Tạo, chỉnh sửa và lưu các định dạng (preset) cho câu trả lời của bot. Các preset này được lưu vào <strong>Local Storage</strong> của trình duyệt.</li>
+                        <li><strong>Lưu tin nhắn:</strong> Nhấn nút "Lưu" (bookmark) trên tin nhắn của bot để lưu (mô phỏng ra Console).</li>
+                        <li><strong>Sidebar thu gọn:</strong> Nhấn nút hamburger <i class="bi bi-list"></i> để thu gọn/mở rộng sidebar.</li>
+                        <li><strong>Chuyển đổi Agent:</strong> Nhấn nút "Origin Agent" / "Obsidian Agent" để chuyển đổi (mô phỏng).</li>
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Đã hiểu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ======================================= -->
     <!-- TOAST (POPUP) THÔNG BÁO -->
     <!-- ======================================= -->
     <div class="toast-container position-fixed top-0 end-0 p-3">
-        <!-- CẬP NHẬT: Thêm class .show để hiển thị mặc định -->
+        <!-- CẬP NHẬT: Xóa class .show để ẩn mặc định -->
         <div id="genericToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
             <div class="toast-header">
                 <i class="bi bi-check-circle-fill me-2"></i> <!-- Icon sẽ thay đổi -->
@@ -712,7 +772,6 @@
             </div>
             <div class="toast-body" id="genericToastBody">
                 <!-- Nội dung thông báo sẽ được chèn vào đây -->
-                Đây là thông báo mặc định.
             </div>
         </div>
     </div>
@@ -1333,7 +1392,7 @@
                 // Sử dụng ủy quyền sự kiện để bắt click vào nút .save-message-btn
                 const saveBtn = e.target.closest('.save-message-btn');
                 
-                if (saveBtn) {
+                if (saveBtn && !saveBtn.disabled) { // Chỉ chạy nếu nút chưa bị disabled
                     // 1. Lấy nội dung tin nhắn (HTML)
                     const messageElement = saveBtn.closest('.message.bot');
                     const messageContent = messageElement.querySelector('.message-content').innerHTML;

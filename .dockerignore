@@ -1,0 +1,17 @@
+# Bỏ qua thư mục build của Next.js
+.next/
+
+# Bỏ qua thư mục dependencies
+node_modules/
+
+# Bỏ qua file biến môi trường
+.env
+.env.local
+.env.production
+.env.development
+
+# Bỏ qua các file log và debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

@@ -4,10 +4,12 @@ import Form from "./components/Form";
 import  FormatModal  from "./components/FormatModel";
 import SideBar from "./components/SideBar";
 import NotificationChat from "./components/NotificationChat";
+import InstructionModal from "./components/InstructionModal";
 
 
 export default function Home() {
 
+  const [isReadmeOpen, setIsReadmeOpen] = useState(false);
  const [isOpen, setIsOpen] = useState(false);
 
  const [formatDetail, setFormatDetail] = useState<any>(null)
@@ -30,6 +32,7 @@ export default function Home() {
       <SideBar isOriginAgent={isOriginAgent} setIsOriginAgent={setIsOriginAgent}
       setIsCollapsed={setIsCollapsed} isCollapsed={isCollapsed}
       setShowNotification={setShowNotification}
+      setIsReadmeOpen={setIsReadmeOpen}
       formatDetail={formatDetail} onOpen={() => setIsOpen(true)}></SideBar>
       <Form isOriginAgent={isOriginAgent}/>
     </div>
@@ -37,6 +40,11 @@ export default function Home() {
           setFormatDetail = {setFormatDetail}
           isOpen={isOpen} 
           onClose={() => setIsOpen(false)} />
+
+    <InstructionModal 
+    isReadmeOpen={isReadmeOpen}
+    setIsReadmeOpen={setIsReadmeOpen}
+    />
     {
       showNotification && <NotificationChat />
     }

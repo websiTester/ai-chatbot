@@ -31,7 +31,7 @@ const addPair = () => {
         setHeaderContents((prev:any) => prev.filter((_:any, i:any) => i !== index));
     };
 
-    const updatePair = (index: number, field: "header" | "content", value: string) => {
+const updatePair = (index: number, field: "header" | "content", value: string) => {
     setHeaderContents((prev:any) =>
       prev.map((pair:any, i:number) =>
         i === index ? { ...pair, [field]: value } : pair

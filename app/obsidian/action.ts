@@ -1,11 +1,12 @@
 "use server";
 import { mastra } from "@/mastra";
-import { obsidianAgent } from "@/mastra/agents/obsidian-agent";
+import { getObsidianAgent } from "@/mastra/agents/obsidian-agent";
 import { AddUpdateResponseToDB } from "@/mastra/db/response-service";
 
 export async function getObsidianResponse(formData: FormData) {
     const input = formData.get("request") as string;
-    const agent = mastra.getAgent("obsidianAgent");
+    //const agent = mastra.getAgent("obsidianAgent");
+    const agent = await getObsidianAgent();
     const result = await agent.generate(input, {
         memory: {
             thread: "user-session", // Use actual user/session ID
@@ -16,7 +17,8 @@ export async function getObsidianResponse(formData: FormData) {
 }
 
 export async function getObsidianResponse2(input: string) {
-    const agent = mastra.getAgent("obsidianAgent");
+    //const agent = mastra.getAgent("obsidianAgent");
+    const agent = await getObsidianAgent();
     const prompt = `
         Thực hiện yêu cầu sau của người dùng: ${input}.
         Trong trường hợp người dùng yêu cầu update, xóa nội dung trong note: thực hiện theo instruction.
@@ -38,11 +40,15 @@ export async function getObsidianResponse2(input: string) {
 export async function saveTextInObsidian(messageToSave: string) {
 
     const prompt = `
-    Thêm note mới vào folder /1 - Rough Note/E-commerce analyze result trong obsidian, nội dung note là:
-    ${messageToSave}
+    Tạo note mới có Title là Analyze Result có định dạng markdown vào folder /1 - Rough Note/E-commerce Analyze Result trong obsidian, đảm bảo note mới là file markdown có đuôi .md.
+    Sau khi note được tạo, ghi đè nội dung bên trong note là:
+    ${messageToSave}.
+    Trong trường hợp folder chưa được khởi tạo, tự động tạo folder tương ứng để lưu trữ note.
+    Tự động chuyển nội dung sang định dạng markdown nếu cần thiết.
     `;
 
-    const agent = mastra.getAgent("obsidianAgent");
+    //const agent = mastra.getAgent("obsidianAgent");
+    const agent = await getObsidianAgent();
     const result = await agent.generate(prompt, {
         memory: {
             thread: "user-session", // Use actual user/session ID

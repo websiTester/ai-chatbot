@@ -13,11 +13,12 @@ type Props = {
     isCollapsed: boolean,
     isOriginAgent?: boolean,
     setIsOriginAgent: any,
+    setIsReadmeOpen: any,
 };
 
 
 export default function SideBar({isOriginAgent, setIsOriginAgent,
-    setIsCollapsed,isCollapsed, setShowNotification, onOpen, formatDetail }: Props) {
+    setIsCollapsed,isCollapsed, setShowNotification, onOpen, formatDetail, setIsReadmeOpen }: Props) {
 
     const [agent1Mode, setAgent1Mode] = useState("default");
     const [agent2Mode, setAgent2Mode] = useState("default");
@@ -142,7 +143,13 @@ export default function SideBar({isOriginAgent, setIsOriginAgent,
             <div className="settings-panel-content">
 
                 <div className="mb-4">
-                    <h2 className="settings-title">Instructions</h2>
+                    
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                        <h2 className="settings-title" style={{marginBottom: 0, border: "none",}}>Instructions</h2>
+                        <button onClick={() => setIsReadmeOpen(true)} className="btn btn-sm btn-outline-info" id="readme-btn" data-bs-toggle="modal" data-bs-target="#readmeModal">
+                            <i className="bi bi-info-circle-fill"></i> README
+                        </button>
+                    </div>
 
                     <form onSubmit={handleSubmit}>
                         <div className="agent-block">

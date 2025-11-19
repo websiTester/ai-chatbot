@@ -26,8 +26,13 @@ export async function getAiResponse(input: string) {
   const functionName = input;
   //const agent = mastra.getAgent("finalAgent");
   const agent = mastra.getAgent("finalShortAgent");
-  
-  const result = await agent.generate(`Phân tích chức năng của 1 website e-commerce: ${functionName}`);
+  //const  agent = await getFinalShortAgent();
+  const result = await agent.generate(`Phân tích chức năng của 1 website e-commerce: ${functionName}`,{
+        memory: {
+            thread: "user-session", 
+            resource: "ecommerce-chat",
+        },
+    });
   return result.text;
 }
 
@@ -35,7 +40,12 @@ export async function getStreamingMarkdown(formData: FormData) {
   const functionName = formData.get("functionName")?.toString();
   const agent = mastra.getAgent("streamingAgent");
 
-  const result = await agent.generate(`Phân tích chức năng của 1 website e-commerce: ${functionName}`);
+  const result = await agent.generate(`Phân tích chức năng của 1 website e-commerce: ${functionName}`,{
+        memory: {
+            thread: "user-ecommerce-session", 
+            resource: "ecommerce-chat",
+        },
+    });
   return result.text;
 }
 

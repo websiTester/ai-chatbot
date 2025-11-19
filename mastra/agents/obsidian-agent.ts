@@ -10,28 +10,28 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 
-var obsidienKey = process.env.OBSIDIAN_API_KEY + "";
-var obsidianUrl = process.env.OBSIDIAN_BASE_URL + "";
-console.log("Đang chạy từ thư mục:", process.cwd());
-console.log("API Key đã nạp:", obsidienKey);
-console.log("Url đã nạp:", obsidianUrl);
+// var obsidienKey = process.env.OBSIDIAN_API_KEY + "";
+// var obsidianUrl = process.env.OBSIDIAN_BASE_URL + "";
+// console.log("Đang chạy từ thư mục:", process.cwd());
+// console.log("API Key đã nạp:", obsidienKey);
+// console.log("Url đã nạp:", obsidianUrl);
 
-export const obsidianMcpClient = new MCPClient({
-  id: "obsidian-mcp-server-client",
-  timeout: 600000,
-  servers: {
-    "obsidian-mcp-server": {
-     command: "npx",
-     args: [ "obsidian-mcp-server" ],
-        env: {
-            OBSIDIAN_API_KEY: obsidienKey,
-            OBSIDIAN_BASE_URL: obsidianUrl,
-            OBSIDIAN_VERIFY_SSL: "false",
-            OBSIDIAN_ENABLE_CACHE: "true"
-        }
-    }
-  }
-});
+// export const obsidianMcpClient = new MCPClient({
+//   id: "obsidian-mcp-server-client",
+//   timeout: 600000,
+//   servers: {
+//     "obsidian-mcp-server": {
+//      command: "npx",
+//      args: [ "obsidian-mcp-server" ],
+//         env: {
+//             OBSIDIAN_API_KEY: obsidienKey,
+//             OBSIDIAN_BASE_URL: obsidianUrl,
+//             OBSIDIAN_VERIFY_SSL: "false",
+//             OBSIDIAN_ENABLE_CACHE: "true"
+//         }
+//     }
+//   }
+// });
 
 
 // const instruction = `
@@ -112,7 +112,64 @@ Bạn là 1 trợ lý hữu ích chuyên về quản lý ghi chú và thông tin
         - Trong trường hợp công cụ tìm kiếm và thay thế vẫn đang gặp vấn đề không xác định.
         - Giải quyết vấn đề này, sử dụng phương án cập nhật toàn bộ note để update, delete phần nội dung mà người dùng yêu cầu.
 `;
-export const obsidianAgent = new Agent({
+// export const obsidianAgent = new Agent({
+//       name: 'Obsidian Agent',
+//       instructions: `
+//           ${instruction}
+//     `,
+//       model: google('gemini-2.0-flash'),
+//       tools: await obsidianMcpClient.getTools(),
+//       memory: new Memory({
+//         storage: new LibSQLStore({
+//           url: "file:./mastraobsidian.db",
+//         }),
+//         vector: new LibSQLVector({
+//           connectionUrl: "file:./mastraobsidian.db",
+//         }),
+//         embedder: fastembed,
+//          options: {
+//             workingMemory: {
+//               enabled: true,
+//             },
+//             lastMessages: 20,
+//           },
+//       }),
+//     });
+
+let obsidianAgentInstance: Agent | null = null;
+
+// Hàm này sẽ lấy agent, hoặc tạo mới nếu chưa có
+export async function getObsidianAgent() {
+  // Nếu đã khởi tạo, trả về ngay
+  if (obsidianAgentInstance) {
+    return obsidianAgentInstance;
+  }
+
+  // --- Khởi tạo chỉ 1 lần, tại LÚC CHẠY (runtime) ---
+  console.log("Đang khởi tạo Obsidian MCP Client và Agent lần đầu...");
+
+  // (Lấy key từ env. Môi trường runtime SẼ có biến này)
+  var obsidienKey = process.env.OBSIDIAN_API_KEY + "";
+  var obsidianUrl = process.env.OBSIDIAN_BASE_URL + "";
+
+  const obsidianMcpClient = new MCPClient({
+    id: "obsidian-mcp-server-client",
+    timeout: 600000,
+    servers: {
+      "obsidian-mcp-server": {
+        command: "npx",
+        args: ["obsidian-mcp-server"],
+        env: {
+          OBSIDIAN_API_KEY: obsidienKey,
+          OBSIDIAN_BASE_URL: obsidianUrl,
+          OBSIDIAN_VERIFY_SSL: "false",
+          OBSIDIAN_ENABLE_CACHE: "true"
+        }
+      }
+    }
+  });
+
+  obsidianAgentInstance = new Agent({
       name: 'Obsidian Agent',
       instructions: `
           ${instruction}
@@ -121,23 +178,21 @@ export const obsidianAgent = new Agent({
       tools: await obsidianMcpClient.getTools(),
       memory: new Memory({
         storage: new LibSQLStore({
-          url: "file:../mastra123.db",
+          url: "file:./mastraobsidian.db",
         }),
         vector: new LibSQLVector({
-          connectionUrl: "file:../mastra123.db",
+          connectionUrl: "file:./mastraobsidian.db",
         }),
         embedder: fastembed,
          options: {
             workingMemory: {
               enabled: true,
             },
-            semanticRecall: {
-              topK: 3, // Retrieve 3 most similar messages
-              messageRange: 2, // Include 2 messages before and after each match
-              scope: "resource", // Search across all threads for this user (default setting if omitted)
-            },
-             
             lastMessages: 20,
           },
       }),
     });
+
+  console.log("Khởi tạo Agent thành công.");
+  return obsidianAgentInstance;
+}

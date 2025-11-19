@@ -117,7 +117,7 @@ export const finalAgent = new Agent({
   tools: {templateTool},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });

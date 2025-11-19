@@ -20,7 +20,7 @@ export var shortOverviewAgent = new Agent({
   tools: {},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
@@ -35,7 +35,7 @@ export const shortMermaidAgent = new Agent({
   tools: {},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
@@ -51,7 +51,7 @@ export const shortUiAgent = new Agent({
   tools: {},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
@@ -66,7 +66,7 @@ export const shortSummaryAgent = new Agent({
   tools: {},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
@@ -81,7 +81,7 @@ export function createAgentWithInstruction(agentName: string, newInstruction: st
     tools: {},
     memory: new Memory({
       storage: new LibSQLStore({
-        url: 'file:../mastra.db',
+        url: 'file:./mastra.db',
       }),
     }),
   });

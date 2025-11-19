@@ -153,7 +153,7 @@ export const uiAgent = new Agent({
   tools: {},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
@@ -211,7 +211,7 @@ export const summaryAgent = new Agent({
   tools: {},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
@@ -257,7 +257,7 @@ export const templateAnalyzeAgent = new Agent({
   tools: {},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
@@ -303,7 +303,7 @@ export const templateAgent = new Agent({
   tools: {},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
@@ -345,7 +345,7 @@ export const standardizeTemplateAgent = new Agent({
   tools: {},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
@@ -366,7 +366,7 @@ export const testAgent = new Agent({
   tools: {getTemplateTool},
   memory: new Memory({
     storage: new LibSQLStore({
-      url: 'file:../mastra.db',
+      url: 'file:./mastra.db',
     }),
   }),
 });
