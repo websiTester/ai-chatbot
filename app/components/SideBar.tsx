@@ -14,10 +14,13 @@ type Props = {
     isOriginAgent?: boolean,
     setIsOriginAgent: any,
     setIsReadmeOpen: any,
+    selectedAgent: any,
+    setSelectedAgent: any,
+    setIsSettingOpen: any
 };
 
 
-export default function SideBar({isOriginAgent, setIsOriginAgent,
+export default function SideBar({selectedAgent,setSelectedAgent,setIsSettingOpen,
     setIsCollapsed,isCollapsed, setShowNotification, onOpen, formatDetail, setIsReadmeOpen }: Props) {
 
     const [agent1Mode, setAgent1Mode] = useState("default");
@@ -27,7 +30,7 @@ export default function SideBar({isOriginAgent, setIsOriginAgent,
     const [instructions, setInstruction] = useState<string[]>([]);
 
     const [functionAgents, setFunctionAgents] = useState<any[][]>([]);
-    
+    const [isDropdownActive, setIsDropdownActive] = useState(false);
 
     
 
@@ -101,6 +104,11 @@ export default function SideBar({isOriginAgent, setIsOriginAgent,
         }
     }
 
+    function handleDropdownItemClick(title:string, icon:string){
+        setIsDropdownActive(false);
+        setSelectedAgent({title:title, icon:icon})
+    }
+
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setIsSaving(true);
@@ -123,21 +131,34 @@ export default function SideBar({isOriginAgent, setIsOriginAgent,
                 <button onClick={() => setIsCollapsed(!isCollapsed)} className="btn btn-sm btn-outline-secondary" id="toggle-sidebar-btn" title="Thu/mở sidebar">
                 <i className="bi bi-list"></i>
             </button>
-                {
-                    isOriginAgent ? (
-                        <button onClick={() => setIsOriginAgent(false)} className="btn text-start btn-outline-secondary" id="agent-toggle-btn">
-                            <i className="bi agent-toggle-icon me-2 bi-stars"></i> 
-                            <span className="agent-toggle-text">Origin Agent</span>
-                        </button>
-                    ):(
-                        <button  onClick={() => setIsOriginAgent(true)} className="btn text-start agent-obsidian-active btn-primary" id="agent-toggle-btn">
-                            <i className="bi agent-toggle-icon me-2 bi-gem"></i> 
-                            <span className="agent-toggle-text">Obsidian Agent</span>
-                        </button>
-                    )
-                }
+            <button onClick={() => setIsSettingOpen(true)} className="btn btn-sm btn-outline-secondary" style={{display: `${selectedAgent.title=="Mega Agent"?"block":"none"}`}} id="settings-btn" title="Cài đặt">
+                    <i className="bi bi-gear-fill"></i>
+                </button>
                 
-                
+
+                <div id="custom-select-container">
+                    <div onClick={() => setIsDropdownActive(!isDropdownActive)} className={`select-trigger ${isDropdownActive ? "active" : ""}`} id="customSelectTrigger">
+                        <div className="d-flex align-items-center overflow-hidden">
+                            <i className={`${selectedAgent.icon}`} id="selected-agent-icon"></i>
+                            <span className="text-truncate" id="selected-agent-text">{selectedAgent.title}</span>
+                        </div>
+                        <i className="bi bi-chevron-down small ms-2"></i>
+                    </div>
+
+                    <ul className={`custom-options ${isDropdownActive? "show":""}`} id="customOptionsList">
+                        <li onClick={() => handleDropdownItemClick("Origin Agent","bi bi-stars me-2")} className={`custom-option ${selectedAgent.title=="Origin Agent"? "selected":""}`} data-value="origin" data-icon="bi-stars">
+                            <i className="bi bi-stars me-2"></i>Origin Agent
+                        </li>
+                        <li onClick={() => handleDropdownItemClick("Obsidian Agent","bi bi-gem me-2")} className={`custom-option ${selectedAgent.title=="Obsidian Agent"? "selected":""}`} data-value="obsidian" data-icon="bi-gem">
+                            <i className="bi bi-gem me-2"></i>Obsidian Agent
+                        </li>
+                        <li onClick={() => handleDropdownItemClick("Mega Agent","bi bi-lightning-charge-fill me-2")} className={`custom-option ${selectedAgent.title=="Mega Agent"? "selected":""}`} data-value="mega" data-icon="bi-lightning-charge-fill">
+                            <i className="bi bi-lightning-charge-fill me-2"></i>Mega Agent
+                        </li>
+                    </ul>
+ 
+                    <input type="hidden" id="selected-agent-value" value="origin"/>
+                </div>
             </div>
 
             <div className="settings-panel-content">
@@ -151,169 +172,184 @@ export default function SideBar({isOriginAgent, setIsOriginAgent,
                         </button>
                     </div>
 
-                    <form onSubmit={handleSubmit}>
-                        <div className="agent-block">
-                            <div className="d-flex justify-content-between align-items-center mb-1">
-                            <h6 className="fw-semibold mb-0">Agent 1</h6>
-                            <button onClick={() => onReset()} className="btn btn-sm btn-outline-warning" id="reset-agent-1-btn" title="Reset Agent 1">
-                                <i className="bi bi-arrow-counterclockwise"></i> Reset
-                            </button>
-                        </div>
-                            <div className="form-check form-check-inline">
-                                <input className="form-check-input instruction-toggle" type="radio" name="agent1-toggle" id="agent1-default" value="default" data-agent="1"
-                                    checked={agent1Mode == "default"}
-                                    onChange={() => onRadioChange(0, "default")} />
-                                <label className="form-check-label" htmlFor="agent1-default">Dùng mặc định</label>
-                            </div>
-                            <div className="form-check form-check-inline">
-                                <input className="form-check-input instruction-toggle" type="radio" name="agent1-toggle" id="agent1-custom" value="custom" data-agent="1"
-                                    checked={agent1Mode == "custom"}
-                                    onChange={() => onRadioChange(0, "custom")} />
-                                <label className="form-check-label" htmlFor="agent1-custom">Dùng tùy chỉnh</label>
-                            </div>
-                            {
-                                agent1Mode == "custom" && (
-                                    <textarea onChange={(e) => handleOnChange(0, e.target.value)}
-                                        value={instructions[0]} id="instruction-agent-1" className="form-control instruction-textarea" rows={5} placeholder="Nhập instruction cho Agent 1..."></textarea>
-
-                                )
-                            }
-
-                            {
-                                agent1Mode == "default" && (
-                                    <div id="agent-1-format-toggles" className="format-toggles-container small mt-2">
-
-                                        {
-
-                                            pair && pair.map((item: any, index: number) => {
-                                                return (<div key={index} className="form-check form-check-inline">
-                                                    <input onChange={(e) => handleOnCheckChange(0, index, e.target)}
-                                                        value={item.header+": "+item.content} className="form-check-input" type="checkbox" id={`agent-1-header-${index}`} />
-                                                    <label className="form-check-label" htmlFor={`agent-1-header-${index}`}>{item.header}</label>
-                                                </div>)
-                                            })
-                                        }
-
+                    {
+                        selectedAgent.title=="Origin Agent" ? (
+                        <form onSubmit={handleSubmit}>
+                                <div className="agent-block">
+                                    <div className="d-flex justify-content-between align-items-center mb-1">
+                                    <h6 className="fw-semibold mb-0">Agent 1</h6>
+                                    <button onClick={() => onReset()} className="btn btn-sm btn-outline-warning" id="reset-agent-1-btn" title="Reset Agent 1">
+                                        <i className="bi bi-arrow-counterclockwise"></i> Reset
+                                    </button>
+                                </div>
+                                    <div className="form-check form-check-inline">
+                                        <input className="form-check-input instruction-toggle" type="radio" name="agent1-toggle" id="agent1-default" value="default" data-agent="1"
+                                            checked={agent1Mode == "default"}
+                                            onChange={() => onRadioChange(0, "default")} />
+                                        <label className="form-check-label" htmlFor="agent1-default">Dùng mặc định</label>
                                     </div>
-                                )
-                            }
-
-
-
-                        </div>
-
-                        <div className="agent-block">
-                            <h6 className="fw-semibold">Agent 2</h6>
-                            <div className="form-check form-check-inline">
-                                <input className="form-check-input instruction-toggle" type="radio" name="agent2-toggle" id="agent2-default" value="default" data-agent="2"
-                                    checked={agent2Mode == "default"}
-                                    onChange={() => onRadioChange(1, "default")} />
-                                <label className="form-check-label" htmlFor="agent2-default">Dùng mặc định</label>
-                            </div>
-                            <div className="form-check form-check-inline">
-                                <input className="form-check-input instruction-toggle" type="radio" name="agent2-toggle" id="agent2-custom" value="custom" data-agent="2"
-                                    checked={agent2Mode == "custom"}
-                                    onChange={() => onRadioChange(1, "custom")} />
-                                <label className="form-check-label" htmlFor="agent2-custom">Dùng tùy chỉnh</label>
-                            </div>
-
-                            {
-                                agent2Mode == "custom" && (
-                                    <textarea onChange={(e) => handleOnChange(1, e.target.value)}
-                                        value={instructions[1]} id="instruction-agent-2" className="form-control instruction-textarea" rows={5} placeholder="Nhập instruction cho Agent 2..."></textarea>
-                                )
-                            }
-
-                            {
-                                agent2Mode == "default" && (
-                                    <div id="agent-2-format-toggles" className="format-toggles-container small mt-2">
-                                        {
-
-                                            pair && pair.map((item: any, index: number) => {
-                                                return (<div key={index} className="form-check form-check-inline">
-                                                    <input onChange={(e) => handleOnCheckChange(1, index, e.target)}
-                                                        value={item.header+": "+item.content} className="form-check-input" type="checkbox" id={`agent-2-header-${index}`} />
-                                                    <label className="form-check-label" htmlFor={`agent-2-header-${index}`}>{item.header}</label>
-                                                </div>)
-                                            })
-                                        }
-
+                                    <div className="form-check form-check-inline">
+                                        <input className="form-check-input instruction-toggle" type="radio" name="agent1-toggle" id="agent1-custom" value="custom" data-agent="1"
+                                            checked={agent1Mode == "custom"}
+                                            onChange={() => onRadioChange(0, "custom")} />
+                                        <label className="form-check-label" htmlFor="agent1-custom">Dùng tùy chỉnh</label>
                                     </div>
-                                )}
+                                    {
+                                        agent1Mode == "custom" && (
+                                            <textarea onChange={(e) => handleOnChange(0, e.target.value)}
+                                                value={instructions[0]} id="instruction-agent-1" className="form-control instruction-textarea" rows={5} placeholder="Nhập instruction cho Agent 1..."></textarea>
 
-                        </div>
+                                        )
+                                    }
 
-                        <div className="agent-block">
-                            <h6 className="fw-semibold">Agent 3</h6>
-                            <div className="form-check form-check-inline">
-                                <input className="form-check-input instruction-toggle" type="radio" name="agent3-toggle" id="agent3-default" value="default" data-agent="3"
-                                    checked={agent3Mode == "default"}
-                                    onChange={() => onRadioChange(2, "default")} />
-                                <label className="form-check-label" htmlFor="agent3-default">Dùng mặc định</label>
-                            </div>
-                            <div className="form-check form-check-inline">
-                                <input className="form-check-input instruction-toggle" type="radio" name="agent3-toggle" id="agent3-custom" value="custom" data-agent="3"
-                                    checked={agent3Mode == "custom"}
-                                    onChange={() => onRadioChange(2, "custom")} />
-                                <label className="form-check-label" htmlFor="agent3-custom">Dùng tùy chỉnh</label>
-                            </div>
-                            {
-                                agent3Mode == "custom" && (
-                                    <textarea onChange={(e) => handleOnChange(2, e.target.value)}
-                                        value={instructions[2]} id="instruction-agent-3" className="form-control instruction-textarea" rows={5} placeholder="Nhập instruction cho Agent 3..."></textarea>
+                                    {
+                                        agent1Mode == "default" && (
+                                            <div id="agent-1-format-toggles" className="format-toggles-container small mt-2">
 
-                                )
-                            }
+                                                {
 
-                            {
-                                agent3Mode == "default" && (
-                                    <div id="agent-3-format-toggles" className="format-toggles-container small mt-2">
-                                        {
+                                                    pair && pair.map((item: any, index: number) => {
+                                                        return (<div key={index} className="form-check form-check-inline">
+                                                            <input onChange={(e) => handleOnCheckChange(0, index, e.target)}
+                                                                value={item.header+": "+item.content} className="form-check-input" type="checkbox" id={`agent-1-header-${index}`} />
+                                                            <label className="form-check-label" htmlFor={`agent-1-header-${index}`}>{item.header}</label>
+                                                        </div>)
+                                                    })
+                                                }
 
-                                            pair && pair.map((item: any, index: number) => {
-                                                return (<div key={index} className="form-check form-check-inline">
-                                                    <input onChange={(e) => handleOnCheckChange(2, index, e.target)} 
-                                                    value={item.header+": "+item.content} className="form-check-input" type="checkbox" id={`agent-3-header-${index}`} />
-                                                    <label className="form-check-label" htmlFor={`agent-3-header-${index}`}>{item.header}</label>
-                                                </div>)
-                                            })
-                                        }
+                                            </div>
+                                        )
+                                    }
 
+
+
+                                </div>
+
+                                <div className="agent-block">
+                                    <h6 className="fw-semibold">Agent 2</h6>
+                                    <div className="form-check form-check-inline">
+                                        <input className="form-check-input instruction-toggle" type="radio" name="agent2-toggle" id="agent2-default" value="default" data-agent="2"
+                                            checked={agent2Mode == "default"}
+                                            onChange={() => onRadioChange(1, "default")} />
+                                        <label className="form-check-label" htmlFor="agent2-default">Dùng mặc định</label>
                                     </div>
-                                )
-                            }
+                                    <div className="form-check form-check-inline">
+                                        <input className="form-check-input instruction-toggle" type="radio" name="agent2-toggle" id="agent2-custom" value="custom" data-agent="2"
+                                            checked={agent2Mode == "custom"}
+                                            onChange={() => onRadioChange(1, "custom")} />
+                                        <label className="form-check-label" htmlFor="agent2-custom">Dùng tùy chỉnh</label>
+                                    </div>
 
-                        </div>
+                                    {
+                                        agent2Mode == "custom" && (
+                                            <textarea onChange={(e) => handleOnChange(1, e.target.value)}
+                                                value={instructions[1]} id="instruction-agent-2" className="form-control instruction-textarea" rows={5} placeholder="Nhập instruction cho Agent 2..."></textarea>
+                                        )
+                                    }
+
+                                    {
+                                        agent2Mode == "default" && (
+                                            <div id="agent-2-format-toggles" className="format-toggles-container small mt-2">
+                                                {
+
+                                                    pair && pair.map((item: any, index: number) => {
+                                                        return (<div key={index} className="form-check form-check-inline">
+                                                            <input onChange={(e) => handleOnCheckChange(1, index, e.target)}
+                                                                value={item.header+": "+item.content} className="form-check-input" type="checkbox" id={`agent-2-header-${index}`} />
+                                                            <label className="form-check-label" htmlFor={`agent-2-header-${index}`}>{item.header}</label>
+                                                        </div>)
+                                                    })
+                                                }
+
+                                            </div>
+                                        )}
+
+                                </div>
+
+                                <div className="agent-block">
+                                    <h6 className="fw-semibold">Agent 3</h6>
+                                    <div className="form-check form-check-inline">
+                                        <input className="form-check-input instruction-toggle" type="radio" name="agent3-toggle" id="agent3-default" value="default" data-agent="3"
+                                            checked={agent3Mode == "default"}
+                                            onChange={() => onRadioChange(2, "default")} />
+                                        <label className="form-check-label" htmlFor="agent3-default">Dùng mặc định</label>
+                                    </div>
+                                    <div className="form-check form-check-inline">
+                                        <input className="form-check-input instruction-toggle" type="radio" name="agent3-toggle" id="agent3-custom" value="custom" data-agent="3"
+                                            checked={agent3Mode == "custom"}
+                                            onChange={() => onRadioChange(2, "custom")} />
+                                        <label className="form-check-label" htmlFor="agent3-custom">Dùng tùy chỉnh</label>
+                                    </div>
+                                    {
+                                        agent3Mode == "custom" && (
+                                            <textarea onChange={(e) => handleOnChange(2, e.target.value)}
+                                                value={instructions[2]} id="instruction-agent-3" className="form-control instruction-textarea" rows={5} placeholder="Nhập instruction cho Agent 3..."></textarea>
+
+                                        )
+                                    }
+
+                                    {
+                                        agent3Mode == "default" && (
+                                            <div id="agent-3-format-toggles" className="format-toggles-container small mt-2">
+                                                {
+
+                                                    pair && pair.map((item: any, index: number) => {
+                                                        return (<div key={index} className="form-check form-check-inline">
+                                                            <input onChange={(e) => handleOnCheckChange(2, index, e.target)} 
+                                                            value={item.header+": "+item.content} className="form-check-input" type="checkbox" id={`agent-3-header-${index}`} />
+                                                            <label className="form-check-label" htmlFor={`agent-3-header-${index}`}>{item.header}</label>
+                                                        </div>)
+                                                    })
+                                                }
+
+                                            </div>
+                                        )
+                                    }
+
+                                </div>
 
 
-                      
-
-                        <button disabled={isSaving} type="submit" className="btn btn-success w-100 mt-2" id="save-instructions-btn">
-                            {
-                                isSaving ? (
-                                    <>
-                                    <i className="bi bi-arrow-repeat"></i> Đang lưu...
-                                    </>
-                                    
-                                ):(
-                                    <>
-                                    <i className="bi bi-save"></i> Lưu Instructions
-                                    </>
-                                    
-                                )
-                            }
                             
-                        </button>
-                        <div id="save-instructions-status" className="form-text mt-2"></div>
-                    </form>
+
+                                <button disabled={isSaving} type="submit" className="btn btn-success w-100 mt-2" id="save-instructions-btn">
+                                    {
+                                        isSaving ? (
+                                            <>
+                                            <i className="bi bi-arrow-repeat"></i> Đang lưu...
+                                            </>
+                                            
+                                        ):(
+                                            <>
+                                            <i className="bi bi-save"></i> Lưu Instructions
+                                            </>
+                                            
+                                        )
+                                    }
+                                    
+                                </button>
+                                <div id="save-instructions-status" className="form-text mt-2"></div>
+                        </form>
+                        ) : (
+                            <div className="origin-badge-minimal">
+                                You are now using <strong>{selectedAgent.title}</strong>
+                            </div>
+                        )
+                    }
+                    
 
 
                 </div>
-
-                <HeaderContentPair 
+                {
+                    selectedAgent.title=="Origin Agent" ? (
+                        <HeaderContentPair 
                     setShowNotification={setShowNotification}   
                     formatDetail={formatDetail}
                     onOpen={() => onOpen()} />
+                    ) : (
+                         <div></div>
+                    )
+                }
+                
 
             </div>
 

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { getAiResponse } from "../test/action";
 import { AddUpdateResponse, getObsidianResponse2, saveTextInObsidian } from "../obsidian/action";
 
-export default function Form({isOriginAgent}: {isOriginAgent: boolean}) {
+export default function Form({selectedAgent}: {selectedAgent: any}) {
      const [messages, setMessages] = useState([
     { sender: "bot", text: "Xin chào! Tôi có thể giúp gì cho bạn?" },
   ]);
@@ -43,9 +43,9 @@ export default function Form({isOriginAgent}: {isOriginAgent: boolean}) {
     setInput("");
 
     var res;
-    if(isOriginAgent){
+    if(selectedAgent.title=="Origin Agent"){
        res = await getAiResponse(userMessage.text);
-    }else {
+    }else if(selectedAgent.title=="Obsidian Agent"){
         res = await getObsidianResponse2(userMessage.text);
     }
     
@@ -71,7 +71,7 @@ export default function Form({isOriginAgent}: {isOriginAgent: boolean}) {
     >
       <div className="message-content">{msg.text}</div>
       {
-        !isOriginAgent && (
+        (selectedAgent.title=="Obsidian Agent") && (
           <button onClick={() => handleSave(i)}
           className="btn btn-sm save-message-btn" title="Lưu tin nhắn" disabled={isSaved[i]} 
             style={{ backgroundColor: "#ddd", border: "1px solid #ccc" }}>
